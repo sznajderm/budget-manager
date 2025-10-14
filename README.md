@@ -1,94 +1,147 @@
-# 10x Astro Starter
+# BudgetManager
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+A web-based application that helps individual users consolidate and categorize expenses and income from multiple bank accounts. Leveraging AI-powered categorization, BudgetManager enables users to quickly record transactions, receive category suggestions, and maintain a clear financial overview without manual sorting.
+
+![Node.js Version](https://img.shields.io/badge/node-22.14.0-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Status](https://img.shields.io/badge/status-MVP%20Development-orange)
+
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Getting Started Locally](#getting-started-locally)
+- [Available Scripts](#available-scripts)
+- [Project Scope](#project-scope)
+- [Project Status](#project-status)
+- [License](#license)
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+| Technology | Version | Purpose |
+|------------|---------|---------||
+| **Frontend** | | |
+| [Astro](https://astro.build/) | 5.13.7 | Modern web framework for building fast, content-focused websites |
+| [React](https://react.dev/) | 19.1.1 | UI library for building interactive components |
+| [TypeScript](https://www.typescriptlang.org/) | 5 | Static typing for better development experience and IDE support |
+| [Tailwind CSS](https://tailwindcss.com/) | 4.1.13 | Utility-first CSS framework for convenient styling |
+| [Shadcn/ui](https://ui.shadcn.com/) | - | Accessible component library for React UI |
+| **Backend** | | |
+| [Supabase](https://supabase.com/) | - | Complete backend solution with PostgreSQL database, BaaS SDK, and built-in user authentication |
+| **AI Integration** | | |
+| [OpenRouter.ai](https://openrouter.ai/) | - | Access to various AI models (OpenAI, Anthropic, Google) for transaction categorization with cost optimization |
+| **CI/CD & Hosting** | | |
+| GitHub Actions | - | CI/CD pipeline automation |
+| DigitalOcean | - | Application hosting via Docker containers |
 
-## Prerequisites
+## Getting Started Locally
+
+### Prerequisites
 
 - Node.js v22.14.0 (as specified in `.nvmrc`)
 - npm (comes with Node.js)
 
-## Getting Started
+### Installation
 
 1. Clone the repository:
-
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
+git clone <repository-url>
+cd budget-manager
 ```
 
 2. Install dependencies:
-
 ```bash
 npm install
 ```
 
-3. Run the development server:
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration values
+```
 
+4. Start the development server:
 ```bash
 npm run dev
 ```
 
-4. Build for production:
+5. Open your browser and navigate to `http://localhost:4321`
+
+### Building for Production
 
 ```bash
 npm run build
+npm run preview
 ```
 
 ## Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+- `npm run build` - Build the application for production
+- `npm run preview` - Preview the production build locally
+- `npm run astro` - Run Astro CLI commands
+- `npm run lint` - Run ESLint to check code quality
+- `npm run lint:fix` - Automatically fix ESLint issues
+- `npm run format` - Format code using Prettier
 
-## Project Structure
+## Project Scope
 
-```md
-.
-├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
-```
+### Core Features (MVP)
 
-## AI Development Support
+**User Authentication**
+- Email/password signup and login
+- Secure session token management
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
+**Account Management**
+- Create, edit, and delete bank accounts (name, type, optional balance)
+- View list of user's accounts
 
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
+**Transaction Management**
+- Create, read, update, and delete transaction records
+- Single-form entry interface for quick transaction input
+- Record details: amount, date, description, account ID, category
 
-### Cursor IDE
+**AI-Powered Categorization**
+- Automatic category suggestions via OpenRouter.ai integration
+- Display suggested categories with confidence scores
+- User can approve, reject, or modify AI suggestions
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
+**Category Management**
+- 15-20 predefined standard categories
+- Create, edit, and delete custom categories
 
-### GitHub Copilot
+**Dashboard**
+- Display total expenses and income summary
+- List recent transactions with edit/delete actions
+- Quick access to add new transactions
 
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
+**Data Persistence**
+- Store transaction data, AI suggestions, confidence scores, and user selections in database
 
-### Windsurf
+### Out of Scope (Current MVP)
 
-The `.windsurfrules` file contains AI configuration for Windsurf.
+- Integration with external banking systems (API connections)
+- Import transactions from files or third-party services
+- Charts or graphical expense/income trend analysis
+- Advanced analytics and reporting
+- Performance optimization for large-scale usage
 
-## Contributing
+### Success Metrics
 
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+- **Primary Goal**: Achieve ≥50% AI categorization accuracy for expenses
+- **Measurement**: Daily comparison of AI-suggested categories vs. user's final category selections
+- **Reporting**: Dashboard showing categorization accuracy percentage over time
+
+## Project Status
+
+🚧 **Currently in MVP Development**
+
+This project is actively being developed as a Minimum Viable Product (MVP). The core functionality for transaction management, AI-powered categorization, and user authentication is being implemented.
+
+### Recent Development Focus
+- Setting up the foundational Astro + React + TypeScript architecture
+- Implementing Supabase integration for backend services
+- Developing the core transaction and account management features
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See the LICENSE file for details.

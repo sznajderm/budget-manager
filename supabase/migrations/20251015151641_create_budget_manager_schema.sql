@@ -129,19 +129,7 @@ create table transactions (
     updated_at timestamptz default now() not null,
     
     -- constraints
-    constraint transactions_description_not_empty check (length(trim(description)) > 0),
-    constraint transactions_user_owns_account check (
-        not exists (
-            select 1 from accounts a 
-            where a.id = account_id and a.user_id != transactions.user_id
-        )
-    ),
-    constraint transactions_user_owns_category check (
-        not exists (
-            select 1 from categories c 
-            where c.id = category_id and c.user_id != transactions.user_id
-        )
-    )
+    constraint transactions_description_not_empty check (length(trim(description)) > 0)
 );
 
 comment on table transactions is 'core transaction records with user ownership validation';

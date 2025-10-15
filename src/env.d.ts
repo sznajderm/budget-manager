@@ -1,10 +1,22 @@
+/// <reference types="astro/client" />
+
+import type { SupabaseClient as SupabaseClientPkg } from '@supabase/supabase-js'
+import type { Database } from './db/database.types'
+
+declare global {
+  namespace App {
+    interface Locals {
+      supabase: SupabaseClientPkg<Database>
+    }
+  }
+}
+
 interface ImportMetaEnv {
-  readonly SUPABASE_URL: string;
-  readonly SUPABASE_KEY: string;
-  readonly OPENROUTER_API_KEY: string;
-  // more env variables...
+  readonly SUPABASE_URL: string
+  readonly SUPABASE_KEY: string
+  readonly OPENROUTER_API_KEY: string
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv;
+  readonly env: ImportMetaEnv
 }

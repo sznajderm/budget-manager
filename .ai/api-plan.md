@@ -226,27 +226,6 @@ The API leverages Supabase's auto-generated REST endpoints with custom RPC funct
 - **Success Codes**: 200 OK
 - **Error Codes**: 401 Unauthorized, 404 Not Found
 
-#### Bulk Reassign Category
-- **HTTP Method**: POST
-- **URL Path**: `/rest/v1/rpc/bulk_reassign_category`
-- **Description**: Reassign transactions from one category to another
-- **Request Payload**:
-```json
-{
-  "from_category_id": "uuid",
-  "to_category_id": "uuid"
-}
-```
-- **Response Payload**:
-```json
-{
-  "success": true,
-  "updated_count": 3
-}
-```
-- **Success Codes**: 200 OK
-- **Error Codes**: 401 Unauthorized, 404 Not Found
-
 ### Transactions (Supabase REST + Custom RPC)
 
 #### List Transactions

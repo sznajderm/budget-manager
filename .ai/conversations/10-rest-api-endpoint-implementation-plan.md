@@ -4,47 +4,44 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### Create Account
+#### Create Category
 - **HTTP Method**: POST
-- **URL Path**: `/rest/v1/accounts`
-- **Description**: Create new financial account
+- **URL Path**: `/rest/v1/categories`
+- **Description**: Create new category
 - **Request Payload**:
 ```json
 {
-  "name": "Savings Account",
-  "account_type": "savings"
+  "name": "Entertainment"
 }
 ```
 - **Response Payload**:
 ```json
 {
   "id": "uuid",
-  "name": "Savings Account", 
-  "account_type": "savings",
+  "name": "Entertainment",
   "created_at": "2024-01-01T00:00:00.000Z",
   "updated_at": "2024-01-01T00:00:00.000Z"
 }
 ```
 - **Success Codes**: 201 Created
-- **Error Codes**: 400 Bad Request, 401 Unauthorized, 422 Unprocessable Entity
+- **Error Codes**: 400 Bad Request, 401 Unauthorized, 409 Conflict (duplicate name)
 </route_api_specification>
 
 2. Related database resources:
 <related_db_resources>
-### accounts
-User financial accounts with soft delete support.
+### categories  
+Transaction categories with predefined and custom user categories.
 
 ```sql
-CREATE TABLE accounts (
+CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    account_type account_type_enum NOT NULL,
-    deleted_at TIMESTAMPTZ NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     
-    CONSTRAINT accounts_name_not_empty CHECK (LENGTH(TRIM(name)) > 0)
+    CONSTRAINT categories_name_not_empty CHECK (LENGTH(TRIM(name)) > 0),
+    CONSTRAINT categories_unique_name_per_user UNIQUE (user_id, LOWER(name))
 );
 ```
 </related_db_resources>
@@ -140,4 +137,4 @@ The final output should be a well-organized implementation plan in markdown form
 
 The final output should consist solely of the implementation plan in markdown format and should not duplicate or repeat any work done in the analysis section.
 
-Remember to save your implementation plan as .ai/endpoints/create-account-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.
+Remember to save your implementation plan as .ai/endpoints/create-transaction-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.

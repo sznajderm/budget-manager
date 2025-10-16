@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { z } from "zod";
 import { createClient } from '@supabase/supabase-js';
 import { createTransaction, TransactionCreateSchema } from "../../../../../lib/services/transaction.service";
+// import { getAuthenticatedUser, createAuthErrorResponse, AuthenticationError } from "../../../../../lib/auth";
 
 export const prerender = false;
 
@@ -25,6 +26,27 @@ export const POST: APIRoute = async (context) => {
         persistSession: false
       }
     });
+
+    // Get Supabase client from context (set by middleware)
+    // const supabase = context.locals.supabase;
+    
+    // if (!supabase) {
+    //   return new Response(JSON.stringify({ error: "Supabase client not available" }), {
+    //     status: 500,
+    //     headers: { "Content-Type": "application/json" },
+    //   });
+    // }
+
+    // // Authenticate user from session
+    // let user;
+    // try {
+    //   user = await getAuthenticatedUser(context.request, supabase);
+    // } catch (error) {
+    //   if (error instanceof AuthenticationError) {
+    //     return createAuthErrorResponse(error);
+    //   }
+    //   throw error; // Re-throw unexpected errors
+    // }
 
     // For testing, hardcode the user ID from the JWT you were using
     const userId = "59b474a9-8b09-4a80-9046-3bc7c0b482a9";

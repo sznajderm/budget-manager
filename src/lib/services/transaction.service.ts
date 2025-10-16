@@ -49,6 +49,38 @@ export async function createTransaction(
   const validatedData = TransactionCreateSchema.parse(transactionData);
 
   try {
+    // Validate account ownership
+    // const { data: account, error: accountError } = await supabase
+    //   .from("accounts")
+    //   .select("*")
+    //   .eq("id", validatedData.account_id)
+    //   .eq("user_id", userId)
+    //   .limit(1);
+
+      
+    // console.log("userId", userId);
+    // console.log("validatedData.account_id", validatedData.account_id);
+    // console.log("account", account);
+    // console.log("accountError", accountError);
+
+    // if (accountError || !account) {
+    //   throw new Error("Account not found or does not belong to user");
+    // }
+
+    // // Validate category ownership (if category_id is provided)
+    // if (validatedData.category_id) {
+    //   const { data: category, error: categoryError } = await supabase
+    //     .from("categories")
+    //     .select("id")
+    //     .eq("id", validatedData.category_id)
+    //     .eq("user_id", userId)
+    //     .single();
+
+    //   if (categoryError || !category) {
+    //     throw new Error("Category not found or does not belong to user");
+    //   }
+    // }
+
     // Insert transaction into database
     const { data, error } = await supabase
       .from("transactions")

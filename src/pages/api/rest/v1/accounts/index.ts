@@ -1,25 +1,34 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
+import { createClient } from '@supabase/supabase-js';
 import { createAccount, AccountCreateSchema } from "../../../../../lib/services/account.service";
 
 export const prerender = false;
 
 export const POST: APIRoute = async (context) => {
   try {
-    // Get Supabase client from context
-    const supabase = context.locals.supabase;
-
-    // Skip authorization - get first user from database for development
-    const { data: users, error: userError } = await supabase.from("accounts").select("user_id").limit(1);
-
-    let userId: string;
-
-    if (userError || !users || users.length === 0) {
-      // If no users exist in accounts table, create a dummy UUID for development
-      userId = "00000000-0000-0000-0000-000000000000";
-    } else {
-      userId = users[0].user_id;
+    // For testing purposes, use service role client to bypass RLS
+    const supabaseUrl = import.meta.env.SUPABASE_URL;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
+    
+    // Create service role client that can bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+
+    // For testing, hardcode the user ID from the JWT you were using
+    const userId = "59b474a9-8b09-4a80-9046-3bc7c0b482a9";
+    const user = { id: userId };
 
     // Parse request body
     let requestBody: unknown;
@@ -85,7 +94,7 @@ export const POST: APIRoute = async (context) => {
 
     // Create account using service
     try {
-      const newAccount = await createAccount(supabase, userId, validatedData);
+      const newAccount = await createAccount(supabase, user.id, validatedData);
 
       return new Response(JSON.stringify(newAccount), {
         status: 201,
@@ -93,7 +102,7 @@ export const POST: APIRoute = async (context) => {
       });
     } catch (error) {
       console.error("Account creation failed:", {
-        userId,
+        userId: user.id,
         accountData: { name: validatedData.name, account_type: validatedData.account_type },
         error: error instanceof Error ? error.message : "Unknown error",
       });

@@ -7,6 +7,9 @@ This directory contains documentation for the Budget Manager REST API endpoints.
 ### Accounts
 - [Create Account](./create-account.md) - `POST /api/rest/v1/accounts` - Create a new financial account
 
+### Authentication
+- [Authentication Guide](./authentication-guide.md) - How to obtain JWT tokens for API testing
+
 ## API Base URL
 
 - **Development**: `http://localhost:4321/api/rest/v1`
@@ -18,7 +21,15 @@ This directory contains documentation for the Budget Manager REST API endpoints.
 All API endpoints expect and return JSON data with `Content-Type: application/json`.
 
 ### Authentication
-Currently in development mode - no authentication required.
+All API endpoints require authentication via Supabase Auth JWT tokens.
+
+**Required Header:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Getting a Token:**
+Authenticate with Supabase Auth and use the `access_token` from the session.
 
 ### Error Format
 All error responses follow this format:

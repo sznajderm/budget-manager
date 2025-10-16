@@ -77,7 +77,7 @@ CREATE TABLE transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
+    category_id UUID NULL REFERENCES categories(id) ON DELETE RESTRICT,
     amount_cents money_cents NOT NULL,
     transaction_type transaction_type_enum NOT NULL,
     description TEXT NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE transactions (
         )
     ),
     CONSTRAINT transactions_user_owns_category CHECK (
-        NOT EXISTS (
+        category_id IS NULL OR NOT EXISTS (
             SELECT 1 FROM categories c 
             WHERE c.id = category_id AND c.user_id != transactions.user_id
         )

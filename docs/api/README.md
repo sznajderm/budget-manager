@@ -7,6 +7,12 @@ This directory contains documentation for the Budget Manager REST API endpoints.
 ### Accounts
 - [Create Account](./create-account.md) - `POST /api/rest/v1/accounts` - Create a new financial account
 
+### Categories
+- [Create Category](./create-category.md) - `POST /api/rest/v1/categories` - Create a new transaction category
+
+### Transactions
+- [Create Transaction](./create-transaction.md) - `POST /api/rest/v1/transactions` - Create a new financial transaction
+
 ### Authentication
 - [Authentication Guide](./authentication-guide.md) - How to obtain JWT tokens for API testing
 

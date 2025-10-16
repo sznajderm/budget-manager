@@ -4,44 +4,70 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### Create Category
+#### Create Transaction
 - **HTTP Method**: POST
-- **URL Path**: `/rest/v1/categories`
-- **Description**: Create new category
+- **URL Path**: `/rest/v1/transactions`
+- **Description**: Create new transaction
 - **Request Payload**:
 ```json
 {
-  "name": "Entertainment"
+  "amount_cents": 1250,
+  "transaction_type": "expense",
+  "description": "Coffee shop",
+  "transaction_date": "2024-01-01T10:30:00.000Z",
+  "account_id": "uuid",
+  "category_id": "uuid"
 }
 ```
 - **Response Payload**:
 ```json
 {
   "id": "uuid",
-  "name": "Entertainment",
+  "amount_cents": 1250,
+  "transaction_type": "expense", 
+  "description": "Coffee shop",
+  "transaction_date": "2024-01-01T10:30:00.000Z",
+  "account_id": "uuid",
+  "category_id": "uuid",
   "created_at": "2024-01-01T00:00:00.000Z",
   "updated_at": "2024-01-01T00:00:00.000Z"
 }
 ```
 - **Success Codes**: 201 Created
-- **Error Codes**: 400 Bad Request, 401 Unauthorized, 409 Conflict (duplicate name)
+- **Error Codes**: 400 Bad Request, 401 Unauthorized, 422 Unprocessable Entity
 </route_api_specification>
 
 2. Related database resources:
 <related_db_resources>
-### categories  
-Transaction categories with predefined and custom user categories.
+### transactions
+Core transaction records with integer amounts in cents.
 
 ```sql
-CREATE TABLE categories (
+CREATE TABLE transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
+    account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    category_id UUID NULL REFERENCES categories(id) ON DELETE RESTRICT,
+    amount_cents money_cents NOT NULL,
+    transaction_type transaction_type_enum NOT NULL,
+    description TEXT NOT NULL,
+    transaction_date TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     
-    CONSTRAINT categories_name_not_empty CHECK (LENGTH(TRIM(name)) > 0),
-    CONSTRAINT categories_unique_name_per_user UNIQUE (user_id, LOWER(name))
+    CONSTRAINT transactions_description_not_empty CHECK (LENGTH(TRIM(description)) > 0),
+    CONSTRAINT transactions_user_owns_account CHECK (
+        NOT EXISTS (
+            SELECT 1 FROM accounts a 
+            WHERE a.id = account_id AND a.user_id != transactions.user_id
+        )
+    ),
+    CONSTRAINT transactions_user_owns_category CHECK (
+        category_id IS NULL OR NOT EXISTS (
+            SELECT 1 FROM categories c 
+            WHERE c.id = category_id AND c.user_id != transactions.user_id
+        )
+    )
 );
 ```
 </related_db_resources>

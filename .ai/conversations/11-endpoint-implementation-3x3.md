@@ -3,7 +3,7 @@ Your task is to implement a REST API endpoint based on the provided implementati
 First, carefully review the provided implementation plan:
 
 <implementation_plan>
-file .ai/endpoints/get-transactions-implementation-plan.md)
+file .ai/endpoints/update-transactions-implementation-plan.md)
 </implementation_plan>
 
 <types>
@@ -55,3 +55,5 @@ After completing the implementation, ensure it includes all necessary imports, f
 If you need to make any assumptions or have any questions about the implementation plan, present them before writing code.
 
 Remember to follow REST API design best practices, adhere to programming language style guidelines, and ensure the code is clean, readable, and well-organized.
+
+Add documentation file for this endpoint based on the previously added documents, e.g. docs/api/create-transaction.md

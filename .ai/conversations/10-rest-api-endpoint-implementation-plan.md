@@ -4,42 +4,21 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### List Transactions
-- **HTTP Method**: GET
-- **URL Path**: `/rest/v1/transactions?select=*,accounts(name),categories(name)&order=created_at.desc&limit=20&offset=0`
-- **Description**: Get user's transactions with related account and category names
-- **Query Parameters**: 
-  - `limit` (integer, default: 20, max: 50)
-  - `offset` (integer, default: 0)
-- **Response Payload**:
+#### Update Transaction
+- **HTTP Method**: PATCH
+- **URL Path**: `/rest/v1/transactions?id=eq.{transaction_id}`
+- **Description**: Update transaction details
+- **Request Payload**:
 ```json
 {
-  "data": [
-    {
-      "id": "uuid",
-      "amount_cents": 1250,
-      "transaction_type": "expense",
-      "description": "Grocery shopping",
-      "transaction_date": "2024-01-01T00:00:00.000Z",
-      "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z",
-      "accounts": {
-        "name": "Checking Account"
-      },
-      "categories": {
-        "name": "Groceries"
-      }
-    }
-  ],
-  "meta": {
-    "total_count": 100,
-    "limit": 20,
-    "offset": 0
-  }
+  "amount_cents": 1500,
+  "description": "Updated description",
+  "category_id": "uuid"
 }
 ```
+- **Response Payload**: Same as Create Transaction
 - **Success Codes**: 200 OK
-- **Error Codes**: 401 Unauthorized
+- **Error Codes**: 400 Bad Request, 401 Unauthorized, 404 Not Found
 </route_api_specification>
 
 2. Related database resources:

@@ -4,21 +4,13 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### Update Transaction
-- **HTTP Method**: PATCH
+#### Delete Transaction
+- **HTTP Method**: DELETE
 - **URL Path**: `/rest/v1/transactions?id=eq.{transaction_id}`
-- **Description**: Update transaction details
-- **Request Payload**:
-```json
-{
-  "amount_cents": 1500,
-  "description": "Updated description",
-  "category_id": "uuid"
-}
-```
-- **Response Payload**: Same as Create Transaction
-- **Success Codes**: 200 OK
-- **Error Codes**: 400 Bad Request, 401 Unauthorized, 404 Not Found
+- **Description**: Permanently delete transaction
+- **Response Payload**: Empty
+- **Success Codes**: 204 No Content
+- **Error Codes**: 401 Unauthorized, 404 Not Found
 </route_api_specification>
 
 2. Related database resources:

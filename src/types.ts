@@ -67,6 +67,10 @@ export type TransactionUpdateCommand = Partial<
   Pick<TablesUpdate<'transactions'>, 'amount_cents' | 'description' | 'category_id'>
 >
 
+export interface DeleteTransactionCommand {
+  transaction_id: string
+}
+
 /** Response type for transaction list endpoint */
 export interface TransactionListResponse {
   data: TransactionDTO[]

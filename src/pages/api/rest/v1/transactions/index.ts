@@ -8,11 +8,11 @@ import {
   TransactionListQuerySchema,
   updateTransaction,
   TransactionUpdateSchema,
-  TransactionIdSchema
+  TransactionIdSchema,
+  deleteTransaction
 } from "../../../../../lib/services/transaction.service";
 import type { TransactionListResponse } from "../../../../../types";
 import { parseTransactionIdFromQuery } from "../../../../../lib/utils/postgrest-parser";
-import { z } from "zod";
 // import { getAuthenticatedUser, createAuthErrorResponse, AuthenticationError } from "../../../../../lib/auth";
 
 export const prerender = false;
@@ -464,6 +464,122 @@ export const PATCH: APIRoute = async (context) => {
   } catch (error) {
     // Catch-all for any unhandled errors in the endpoint
     console.error("Unhandled error in PATCH /rest/v1/transactions:", error);
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+};
+
+export const DELETE: APIRoute = async (context) => {
+  try {
+    // For testing purposes, use service role client to bypass RLS
+    const supabaseUrl = import.meta.env.SUPABASE_URL;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    
+    // Create service role client that can bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+
+    // For testing, hardcode the user ID
+    const userId = "59b474a9-8b09-4a80-9046-3bc7c0b482a9";
+    const user = { id: userId };
+
+    // Extract transaction ID from PostgREST-style query parameter
+    const url = new URL(context.request.url);
+    const queryParams = url.searchParams;
+    const transactionId = parseTransactionIdFromQuery(queryParams);
+
+    if (!transactionId) {
+      return new Response(JSON.stringify({ 
+        error: "Transaction ID is required in format: ?id=eq.{transaction_id}" 
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate transaction ID format
+    try {
+      TransactionIdSchema.parse(transactionId);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return new Response(JSON.stringify({ 
+          error: "Invalid transaction ID format: must be a valid UUID" 
+        }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Delete transaction using service
+    try {
+      await deleteTransaction(supabase, user.id, transactionId);
+
+      // Return 204 No Content on successful deletion
+      return new Response(null, {
+        status: 204,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Transaction deletion failed:", {
+        userId: user.id,
+        transactionId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+
+      if (error instanceof Error) {
+        // Check if it's a not found error
+        if (
+          error.message.includes("Transaction not found") ||
+          error.message.includes("does not belong to user")
+        ) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        // Check if it's a validation error
+        if (error.message.includes("Validation error")) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        // Database errors
+        if (
+          error.message.includes("Failed to delete transaction due to database error")
+        ) {
+          return new Response(JSON.stringify({ error: "Failed to delete transaction" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      // Generic server error for unexpected issues
+      return new Response(JSON.stringify({ error: "An unexpected error occurred while deleting the transaction" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  } catch (error) {
+    // Catch-all for any unhandled errors in the endpoint
+    console.error("Unhandled error in DELETE /rest/v1/transactions:", error);
     return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

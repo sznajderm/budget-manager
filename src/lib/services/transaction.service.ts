@@ -28,6 +28,11 @@ export const TransactionUpdateSchema = z.object({
 // Validation schema for transaction ID from URL parameter
 export const TransactionIdSchema = z.string().uuid("Transaction ID must be a valid UUID");
 
+// Validation schema for transaction deletion (PostgREST query parameter)
+export const DeleteTransactionSchema = z.object({
+  id: z.string().uuid("Transaction ID must be a valid UUID")
+});
+
 // Validation schema for transaction list query parameters
 export const TransactionListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -402,5 +407,62 @@ export async function updateTransaction(
     // Fallback for unexpected errors
     console.error("Unexpected error in updateTransaction:", error);
     throw new Error("An unexpected error occurred while updating the transaction");
+  }
+}
+
+/**
+ * Permanently deletes a transaction for the authenticated user
+ * @param supabase - Supabase client with user session
+ * @param userId - User ID from authenticated session
+ * @param transactionId - Transaction ID to delete
+ * @returns Promise<void> - No return value on successful deletion
+ */
+export async function deleteTransaction(
+  supabase: SupabaseClient,
+  userId: string,
+  transactionId: string
+): Promise<void> {
+  // Validate transaction ID format
+  const validatedId = TransactionIdSchema.parse(transactionId);
+
+  try {
+    // First verify transaction exists and belongs to user
+    const { data: existingTransaction, error: fetchError } = await supabase
+      .from("transactions")
+      .select("id, user_id")
+      .eq("id", validatedId)
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError || !existingTransaction) {
+      throw new Error("Transaction not found or does not belong to user");
+    }
+
+    // Delete transaction from database
+    const { error: deleteError } = await supabase
+      .from("transactions")
+      .delete()
+      .eq("id", validatedId)
+      .eq("user_id", userId);
+
+    if (deleteError) {
+      console.error("Database error deleting transaction:", deleteError);
+      throw new Error("Failed to delete transaction due to database error");
+    }
+
+    // No data to return on successful deletion
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(`Validation error: ${error.errors.map((e) => e.message).join(", ")}`);
+    }
+
+    // Re-throw our custom errors
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    // Fallback for unexpected errors
+    console.error("Unexpected error in deleteTransaction:", error);
+    throw new Error("An unexpected error occurred while deleting the transaction");
   }
 }

@@ -220,8 +220,8 @@ export const GET: APIRoute = async (context) => {
     // Parse and validate query parameters
     const url = new URL(context.request.url);
     const rawParams = {
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset')
+      limit: url.searchParams.get('limit') || undefined,
+      offset: url.searchParams.get('offset') || undefined
     };
 
     // Validate query parameters using Zod schema

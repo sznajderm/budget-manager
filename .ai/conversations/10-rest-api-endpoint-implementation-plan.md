@@ -4,37 +4,42 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### Create Transaction
-- **HTTP Method**: POST
-- **URL Path**: `/rest/v1/transactions`
-- **Description**: Create new transaction
-- **Request Payload**:
-```json
-{
-  "amount_cents": 1250,
-  "transaction_type": "expense",
-  "description": "Coffee shop",
-  "transaction_date": "2024-01-01T10:30:00.000Z",
-  "account_id": "uuid",
-  "category_id": "uuid"
-}
-```
+#### List Transactions
+- **HTTP Method**: GET
+- **URL Path**: `/rest/v1/transactions?select=*,accounts(name),categories(name)&order=created_at.desc&limit=20&offset=0`
+- **Description**: Get user's transactions with related account and category names
+- **Query Parameters**: 
+  - `limit` (integer, default: 20, max: 50)
+  - `offset` (integer, default: 0)
 - **Response Payload**:
 ```json
 {
-  "id": "uuid",
-  "amount_cents": 1250,
-  "transaction_type": "expense", 
-  "description": "Coffee shop",
-  "transaction_date": "2024-01-01T10:30:00.000Z",
-  "account_id": "uuid",
-  "category_id": "uuid",
-  "created_at": "2024-01-01T00:00:00.000Z",
-  "updated_at": "2024-01-01T00:00:00.000Z"
+  "data": [
+    {
+      "id": "uuid",
+      "amount_cents": 1250,
+      "transaction_type": "expense",
+      "description": "Grocery shopping",
+      "transaction_date": "2024-01-01T00:00:00.000Z",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "accounts": {
+        "name": "Checking Account"
+      },
+      "categories": {
+        "name": "Groceries"
+      }
+    }
+  ],
+  "meta": {
+    "total_count": 100,
+    "limit": 20,
+    "offset": 0
+  }
 }
 ```
-- **Success Codes**: 201 Created
-- **Error Codes**: 400 Bad Request, 401 Unauthorized, 422 Unprocessable Entity
+- **Success Codes**: 200 OK
+- **Error Codes**: 401 Unauthorized
 </route_api_specification>
 
 2. Related database resources:
@@ -163,4 +168,4 @@ The final output should be a well-organized implementation plan in markdown form
 
 The final output should consist solely of the implementation plan in markdown format and should not duplicate or repeat any work done in the analysis section.
 
-Remember to save your implementation plan as .ai/endpoints/create-transaction-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.
+Remember to save your implementation plan as .ai/endpoints/get-transactions-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.

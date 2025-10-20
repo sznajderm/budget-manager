@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { SupabaseClient } from "../../db/supabase.client";
-import type { TransactionType, TransactionDTO } from "../../types";
+import type { TransactionType, TransactionDTO, TransactionUpdateCommand } from "../../types";
 
 // Validation schema for transaction creation
 export const TransactionCreateSchema = z.object({
@@ -16,6 +16,18 @@ export const TransactionCreateSchema = z.object({
   category_id: z.string().uuid("Category ID must be a valid UUID").nullable().optional(),
 });
 
+// Validation schema for transaction updates
+export const TransactionUpdateSchema = z.object({
+  amount_cents: z.number().int().positive("Amount must be a positive integer in cents").optional(),
+  description: z.string().trim().min(1, "Description cannot be empty").optional(),
+  category_id: z.string().uuid("Category ID must be a valid UUID").nullable().optional(),
+}).refine((data) => Object.keys(data).length > 0, {
+  message: "At least one field must be provided for update"
+});
+
+// Validation schema for transaction ID from URL parameter
+export const TransactionIdSchema = z.string().uuid("Transaction ID must be a valid UUID");
+
 // Validation schema for transaction list query parameters
 export const TransactionListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -23,6 +35,7 @@ export const TransactionListQuerySchema = z.object({
 });
 
 export type ValidatedTransactionCreateCommand = z.infer<typeof TransactionCreateSchema>;
+export type ValidatedTransactionUpdateCommand = z.infer<typeof TransactionUpdateSchema>;
 export type ValidatedTransactionListQuery = z.infer<typeof TransactionListQuerySchema>;
 
 /**
@@ -253,5 +266,141 @@ export async function listTransactions(
     // Fallback for unexpected errors
     console.error("Unexpected error in listTransactions:", error);
     throw new Error("An unexpected error occurred while retrieving transactions");
+  }
+}
+
+/**
+ * Updates an existing transaction for the authenticated user
+ * @param supabase - Supabase client with user session
+ * @param userId - User ID from authenticated session
+ * @param transactionId - Transaction ID to update
+ * @param updateData - Validated transaction update data
+ * @returns Promise<TransactionDTO> - The updated transaction with embedded names
+ */
+export async function updateTransaction(
+  supabase: SupabaseClient,
+  userId: string,
+  transactionId: string,
+  updateData: ValidatedTransactionUpdateCommand
+): Promise<TransactionDTO> {
+  // Validate input data
+  const validatedData = TransactionUpdateSchema.parse(updateData);
+  const validatedId = TransactionIdSchema.parse(transactionId);
+
+  try {
+    // First verify transaction exists and belongs to user
+    const { data: existingTransaction, error: fetchError } = await supabase
+      .from("transactions")
+      .select("id, user_id")
+      .eq("id", validatedId)
+      .eq("user_id", userId)
+      .single();
+
+    if (fetchError || !existingTransaction) {
+      throw new Error("Transaction not found or does not belong to user");
+    }
+
+    // Validate category ownership if category_id is being updated
+    if (validatedData.category_id !== undefined && validatedData.category_id !== null) {
+      const { data: category, error: categoryError } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("id", validatedData.category_id)
+        .eq("user_id", userId)
+        .single();
+
+      if (categoryError || !category) {
+        throw new Error("Category not found or does not belong to user");
+      }
+    }
+
+    // Update transaction in database with automatic updated_at timestamp
+    const updatePayload: any = {};
+    if (validatedData.amount_cents !== undefined) {
+      updatePayload.amount_cents = validatedData.amount_cents;
+    }
+    if (validatedData.description !== undefined) {
+      updatePayload.description = validatedData.description;
+    }
+    if (validatedData.category_id !== undefined) {
+      updatePayload.category_id = validatedData.category_id;
+    }
+
+    const { data, error } = await supabase
+      .from("transactions")
+      .update(updatePayload)
+      .eq("id", validatedId)
+      .eq("user_id", userId)
+      .select(`
+        id,
+        amount_cents,
+        transaction_type,
+        description,
+        transaction_date,
+        account_id,
+        category_id,
+        created_at,
+        updated_at,
+        accounts!inner(name),
+        categories(name)
+      `)
+      .single();
+
+    if (error) {
+      console.error("Database error updating transaction:", error);
+
+      // Handle specific database constraint violations
+      if (error.code === "23503") {
+        // foreign key violation
+        if (error.message?.includes("category_id")) {
+          throw new Error("Category not found or does not belong to user");
+        }
+        throw new Error("Invalid category reference");
+      }
+      if (error.code === "23514") {
+        // check constraint violation
+        throw new Error("Transaction data violates database constraints");
+      }
+
+      throw new Error("Failed to update transaction due to database error");
+    }
+
+    if (!data) {
+      throw new Error("Transaction update failed - no data returned");
+    }
+
+    // Transform data to match TransactionDTO format
+    const updatedTransaction: TransactionDTO = {
+      id: data.id,
+      amount_cents: data.amount_cents,
+      transaction_type: data.transaction_type as TransactionType,
+      description: data.description,
+      transaction_date: data.transaction_date,
+      account_id: data.account_id,
+      category_id: data.category_id,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      accounts: {
+        name: data.accounts?.name || "Unknown Account"
+      },
+      categories: data.categories ? {
+        name: data.categories.name
+      } : null
+    };
+
+    return updatedTransaction;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(`Validation error: ${error.errors.map((e) => e.message).join(", ")}`);
+    }
+
+    // Re-throw our custom errors
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    // Fallback for unexpected errors
+    console.error("Unexpected error in updateTransaction:", error);
+    throw new Error("An unexpected error occurred while updating the transaction");
   }
 }

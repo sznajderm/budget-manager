@@ -67,6 +67,12 @@ export type TransactionUpdateCommand = Partial<
   Pick<TablesUpdate<'transactions'>, 'amount_cents' | 'description' | 'category_id'>
 >
 
+/** Response type for transaction list endpoint */
+export interface TransactionListResponse {
+  data: TransactionDTO[]
+  meta: PaginationMeta
+}
+
 /** AI Suggestion DTOs & Commands */
 export interface AISuggestionDTO {
   id: string

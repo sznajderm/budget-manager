@@ -4,26 +4,12 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### Get Expense Summary
+#### Get Income Summary
 - **HTTP Method**: POST
-- **URL Path**: `/rest/v1/rpc/get_expense_summary`
-- **Description**: Get total expenses for user
-- **Request Payload**:
-```json
-{
-  "start_date": "2024-01-01T00:00:00.000Z",
-  "end_date": "2024-01-31T23:59:59.000Z"
-}
-```
-- **Response Payload**:
-```json
-{
-  "total_cents": 125000,
-  "transaction_count": 45,
-  "period_start": "2024-01-01T00:00:00.000Z",
-  "period_end": "2024-01-31T23:59:59.000Z"
-}
-```
+- **URL Path**: `/rest/v1/rpc/get_income_summary`
+- **Description**: Get total income for user
+- **Request Payload**: Same as Get Expense Summary
+- **Response Payload**: Same structure as Get Expense Summary
 - **Success Codes**: 200 OK
 - **Error Codes**: 401 Unauthorized
 </route_api_specification>
@@ -154,4 +140,4 @@ The final output should be a well-organized implementation plan in markdown form
 
 The final output should consist solely of the implementation plan in markdown format and should not duplicate or repeat any work done in the analysis section.
 
-Remember to save your implementation plan as .ai/endpoints/get-expense-summary-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.
+Remember to save your implementation plan as .ai/endpoints/get-income-summary-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.

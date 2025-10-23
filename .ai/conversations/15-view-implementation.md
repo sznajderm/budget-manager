@@ -3,7 +3,7 @@ Your task is to implement a frontend view based on the provided implementation p
 First, review the implementation plan:
 
 <implementation_plan>
-file .ai/views/dashboard-view-implementation-plan.md
+file .ai/views/transactions-view-implementation-plan.md
 </implementation_plan>
 
 Now review the implementation rules:

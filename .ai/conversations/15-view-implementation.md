@@ -67,3 +67,5 @@ Execute the following steps to implement the frontend view:
 Throughout the implementation process, strictly adhere to the provided implementation rules. These rules take precedence over any general best practices that may conflict with them.
 
 Ensure that your implementation accurately reflects the provided implementation plan and adheres to all specified rules. Pay special attention to component structure, API integration, and handling of user interactions.
+
+Don't update linter

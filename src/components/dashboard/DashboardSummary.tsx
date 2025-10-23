@@ -65,7 +65,7 @@ export default function DashboardSummary() {
         )}
       </section>
 
-      <section aria-label="Summary cards" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <section aria-label="Summary cards" className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[600px]">
         <SummaryCard
           title="Total Expenses"
           kind="expense"

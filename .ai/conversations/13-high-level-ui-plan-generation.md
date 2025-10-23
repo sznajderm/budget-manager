@@ -346,8 +346,3 @@ Present the final user interface architecture in the following Markdown format:
 Focus exclusively on user interface architecture, user journey, navigation, and key elements for each view. Do not include implementation details, specific visual design, or code examples unless they are crucial to understanding the architecture.
 
 The final result should consist solely of the UI architecture in Markdown format in English, which you will save in the .ai/ui-plan.md file. Do not duplicate or repeat any work done in the thinking block.
-
----------
-
-AI:
-

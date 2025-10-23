@@ -15,7 +15,7 @@ import type {
   CategoryOption,
   TransactionCreatePayload,
   TransactionUpdatePayload,
-} from "../types";
+} from "@/lib/transactions/types";
 
 interface AddEditTransactionModalProps {
   open: boolean;

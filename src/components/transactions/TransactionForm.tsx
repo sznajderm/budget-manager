@@ -17,7 +17,7 @@ import {
   type FieldErrorMap,
   type AccountOption,
   type CategoryOption,
-} from "../types";
+} from "@/lib/transactions/types";
 import { ZodError } from "zod";
 
 interface TransactionFormProps {

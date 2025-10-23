@@ -6,11 +6,11 @@ import {
   deleteTransaction,
   fetchAccounts,
   fetchCategories,
-} from "../api/client";
+} from "@/lib/api/transactions";
 import type {
   TransactionCreatePayload,
   TransactionUpdatePayload,
-} from "../types";
+} from "@/lib/transactions/types";
 
 /**
  * Hook to fetch paginated transactions list

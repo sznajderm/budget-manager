@@ -5,7 +5,7 @@ import type {
   TransactionUpdatePayload,
   AccountOption,
   CategoryOption,
-} from "../types";
+} from "@/lib/transactions/types";
 
 const BASE_URL = "/api/rest/v1";
 

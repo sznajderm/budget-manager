@@ -9,7 +9,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { TransactionRow } from "./TransactionRow";
 import { EmptyState } from "./EmptyState";
-import type { TransactionVM } from "../types";
+import type { TransactionVM } from "@/lib/transactions/types";
 
 interface TransactionsTableProps {
   items: TransactionVM[];

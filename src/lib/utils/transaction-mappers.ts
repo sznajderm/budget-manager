@@ -1,4 +1,4 @@
-import type { TransactionDTO, TransactionVM } from "../types";
+import type { TransactionDTO, TransactionVM } from "@/lib/transactions/types";
 import { formatCentsAsUSD, getAmountClassName } from "@/lib/utils/currency";
 
 /**

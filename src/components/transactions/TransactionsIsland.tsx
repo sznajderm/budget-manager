@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { TransactionsHeader } from "./components/TransactionsHeader";
-import { PaginationControls } from "./components/PaginationControls";
-import { TransactionsTable } from "./components/TransactionsTable";
-import { AddEditTransactionModal } from "./components/AddEditTransactionModal";
-import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
+import { TransactionsHeader } from "./TransactionsHeader";
+import { PaginationControls } from "./PaginationControls";
+import { TransactionsTable } from "./TransactionsTable";
+import { AddEditTransactionModal } from "./AddEditTransactionModal";
+import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import {
   useTransactionsQuery,
   useAccountsQuery,
@@ -12,11 +12,11 @@ import {
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
   useDeleteTransactionMutation,
-} from "./hooks/useTransactions";
-import { mapTransactionsToVMs } from "./utils/mappers";
+} from "@/hooks/useTransactions";
+import { mapTransactionsToVMs } from "@/lib/utils/transaction-mappers";
 import { centsToDollars } from "@/lib/utils/currency";
 import { formatISOToUI, getCurrentUIDate } from "@/lib/utils/datetime";
-import type { TransactionVM, TransactionFormValues } from "./types";
+import type { TransactionVM, TransactionFormValues } from "@/lib/transactions/types";
 
 export function TransactionsIsland() {
   // URL state management

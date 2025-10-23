@@ -1,6 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import type { TransactionVM } from "../types";
+import type { TransactionVM } from "@/lib/transactions/types";
 import { formatISOToUI } from "@/lib/utils/datetime";
 
 interface TransactionRowProps {

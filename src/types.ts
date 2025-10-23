@@ -64,7 +64,7 @@ export type TransactionCreateCommand = Pick<
 >
 
 export type TransactionUpdateCommand = Partial<
-  Pick<TablesUpdate<'transactions'>, 'amount_cents' | 'description' | 'category_id'>
+  Pick<TablesUpdate<'transactions'>, 'amount_cents' | 'description' | 'category_id' | 'transaction_type' | 'transaction_date' | 'account_id'>
 >
 
 export interface DeleteTransactionCommand {

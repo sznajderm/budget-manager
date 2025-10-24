@@ -3,7 +3,7 @@ Your task is to implement a REST API endpoint based on the provided implementati
 First, carefully review the provided implementation plan:
 
 <implementation_plan>
-file .ai/endpoints/get-accounts-implementation-plan.md)
+file .ai/endpoints/get-categories-implementation-plan.md)
 </implementation_plan>
 
 <types>

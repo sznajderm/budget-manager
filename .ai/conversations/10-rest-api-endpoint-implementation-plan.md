@@ -4,10 +4,10 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### List Accounts
+#### List Categories
 - **HTTP Method**: GET
-- **URL Path**: `/rest/v1/accounts?deleted_at=is.null&order=created_at.desc&limit=20&offset=0`
-- **Description**: Get user's active accounts with pagination
+- **URL Path**: `/rest/v1/categories?order=created_at.desc&limit=20&offset=0`
+- **Description**: Get user's categories with pagination
 - **Query Parameters**: 
   - `limit` (integer, default: 20, max: 50)
   - `offset` (integer, default: 0)
@@ -17,14 +17,13 @@ Before we begin, review the following information:
   "data": [
     {
       "id": "uuid",
-      "name": "Checking Account",
-      "account_type": "checking",
+      "name": "Groceries",
       "created_at": "2024-01-01T00:00:00.000Z",
       "updated_at": "2024-01-01T00:00:00.000Z"
     }
   ],
   "meta": {
-    "total_count": 5,
+    "total_count": 15,
     "limit": 20,
     "offset": 0
   }
@@ -36,20 +35,19 @@ Before we begin, review the following information:
 
 2. Related database resources:
 <related_db_resources>
-### accounts
-User financial accounts with soft delete support.
+### categories  
+Transaction categories with predefined and custom user categories.
 
 ```sql
-CREATE TABLE accounts (
+CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
-    account_type account_type_enum NOT NULL,
-    deleted_at TIMESTAMPTZ NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     
-    CONSTRAINT accounts_name_not_empty CHECK (LENGTH(TRIM(name)) > 0)
+    CONSTRAINT categories_name_not_empty CHECK (LENGTH(TRIM(name)) > 0),
+    CONSTRAINT categories_unique_name_per_user UNIQUE (user_id, LOWER(name))
 );
 ```
 </related_db_resources>
@@ -145,4 +143,4 @@ The final output should be a well-organized implementation plan in markdown form
 
 The final output should consist solely of the implementation plan in markdown format and should not duplicate or repeat any work done in the analysis section.
 
-Remember to save your implementation plan as .ai/endpoints/get-accounts-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.
+Remember to save your implementation plan as .ai/endpoints/get-categories-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.

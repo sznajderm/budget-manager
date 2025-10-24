@@ -50,6 +50,12 @@ export interface BulkReassignCategoryCommand {
   to_category_id: string
 }
 
+/** Response type for category list endpoint */
+export interface CategoryListResponse {
+  data: CategoryDTO[]
+  meta: PaginationMeta
+}
+
 /** Transaction DTOs & Commands */
 export type TransactionType = Enums<'transaction_type_enum'>
 

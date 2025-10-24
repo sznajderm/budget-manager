@@ -1,8 +1,12 @@
 import { z } from 'zod'
 import type { APIRoute } from 'astro'
 import { createClient } from '@supabase/supabase-js'
-import { createCategory } from '../../../../../lib/services/category.service'
-import type { CategoryCreateCommand } from '../../../../../types'
+import { 
+  createCategory,
+  listCategories,
+  CategoryListQuerySchema
+} from '../../../../../lib/services/category.service'
+import type { CategoryCreateCommand, CategoryListResponse } from '../../../../../types'
 
 export const prerender = false
 
@@ -154,6 +158,111 @@ export const POST: APIRoute = async (context) => {
   } catch (error) {
     // Catch-all for any unhandled errors in the endpoint
     console.error('Unhandled error in POST /rest/v1/categories:', error)
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+}
+
+export const GET: APIRoute = async (context) => {
+  try {
+    // For testing purposes, use service role client to bypass RLS
+    const supabaseUrl = import.meta.env.SUPABASE_URL
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+    
+    // Create service role client that can bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+
+    // For testing, hardcode the user ID
+    const userId = '59b474a9-8b09-4a80-9046-3bc7c0b482a9'
+    
+    // Parse and validate query parameters
+    const url = new URL(context.request.url)
+    const rawParams = {
+      limit: url.searchParams.get('limit') || undefined,
+      offset: url.searchParams.get('offset') || undefined,
+      order: url.searchParams.get('order') || undefined
+    }
+
+    // Validate query parameters using Zod schema
+    let validatedParams
+    try {
+      validatedParams = CategoryListQuerySchema.parse(rawParams)
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return new Response(JSON.stringify({ 
+          error: 'Invalid query parameters',
+          details: error.errors
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+
+      return new Response(JSON.stringify({ error: 'Invalid query parameters' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Retrieve categories using service
+    try {
+      const response: CategoryListResponse = await listCategories(supabase, userId, validatedParams)
+
+      return new Response(JSON.stringify(response), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    } catch (error) {
+      console.error('Category retrieval failed:', {
+        userId,
+        queryParams: validatedParams,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+
+      if (error instanceof Error) {
+        // Check if it's a validation error
+        if (error.message.includes('Validation error')) {
+          return new Response(JSON.stringify({ error: error.message }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+
+        // Database-related errors
+        if (
+          error.message.includes('Failed to retrieve') ||
+          error.message.includes('database error')
+        ) {
+          return new Response(JSON.stringify({ error: 'Failed to retrieve categories' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+      }
+
+      // Generic server error for unexpected issues
+      return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+  } catch (error) {
+    // Catch-all for any unhandled errors in the endpoint
+    console.error('Unhandled error in GET /rest/v1/categories:', error)
     return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

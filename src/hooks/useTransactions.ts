@@ -4,9 +4,9 @@ import {
   createTransaction,
   updateTransaction,
   deleteTransaction,
-  fetchAccounts,
-  fetchCategories,
 } from "@/lib/api/transactions";
+import { fetchAccounts } from "@/lib/api/accounts";
+import { fetchCategories } from "@/lib/api/categories";
 import type {
   TransactionCreatePayload,
   TransactionUpdatePayload,

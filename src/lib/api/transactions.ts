@@ -3,8 +3,6 @@ import type {
   TransactionListResponse,
   TransactionCreatePayload,
   TransactionUpdatePayload,
-  AccountOption,
-  CategoryOption,
 } from "@/lib/transactions/types";
 
 const BASE_URL = "/api/rest/v1";
@@ -131,32 +129,4 @@ export async function deleteTransaction(id: string): Promise<void> {
   await handleResponse<void>(res);
 }
 
-/**
- * Fetch list of accounts
- */
-export async function fetchAccounts(): Promise<AccountOption[]> {
-  const res = await fetch(
-    `${BASE_URL}/accounts?select=id,name&order=name.asc`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  );
 
-  return handleResponse<AccountOption[]>(res);
-}
-
-/**
- * Fetch list of categories
- */
-export async function fetchCategories(): Promise<CategoryOption[]> {
-  const res = await fetch(
-    `${BASE_URL}/categories?select=id,name&order=name.asc`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  );
-
-  return handleResponse<CategoryOption[]>(res);
-}

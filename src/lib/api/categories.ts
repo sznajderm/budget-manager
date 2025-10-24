@@ -1,4 +1,5 @@
 import type { CategoryOption } from "@/lib/transactions/types";
+import type { CategoryListResponse } from "@/types";
 
 const BASE_URL = "/api/rest/v1";
 
@@ -42,5 +43,6 @@ export async function fetchCategories(): Promise<CategoryOption[]> {
     }
   );
 
-  return handleResponse<CategoryOption[]>(res);
+  const response = await handleResponse<CategoryListResponse>(res);
+  return response.data;
 }

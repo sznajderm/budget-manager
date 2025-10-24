@@ -43,6 +43,10 @@ export function TransactionForm({
   onSubmit,
   onCancel,
 }: TransactionFormProps) {
+  // Ensure accounts and categories are always arrays
+  const safeAccounts = Array.isArray(accounts) ? accounts : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   const [formData, setFormData] = useState<TransactionFormValues>(
     initialValues || {
       amount_dollars: "",
@@ -64,6 +68,16 @@ export function TransactionForm({
       setFormData(initialValues);
     }
   }, [initialValues]);
+
+  // Update account_id when accounts load and current account_id is empty
+  useEffect(() => {
+    if (mode === "create" && !formData.account_id && safeAccounts.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        account_id: safeAccounts[0].id,
+      }));
+    }
+  }, [mode, formData.account_id, safeAccounts]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +174,7 @@ export function TransactionForm({
             <SelectValue placeholder="Select account" />
           </SelectTrigger>
           <SelectContent>
-            {accounts.map((account) => (
+            {safeAccounts.map((account) => (
               <SelectItem key={account.id} value={account.id}>
                 {account.name}
               </SelectItem>
@@ -188,7 +202,7 @@ export function TransactionForm({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="null">No category</SelectItem>
-            {categories.map((category) => (
+            {safeCategories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.name}
               </SelectItem>

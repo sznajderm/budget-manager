@@ -73,9 +73,10 @@ export function TransactionsIsland() {
   const deleteMutation = useDeleteTransactionMutation();
 
   // Transform data to ViewModels
-  const transactions = transactionsData
-    ? mapTransactionsToVMs(transactionsData.data)
-    : [];
+  const transactions =
+    transactionsData && Array.isArray(transactionsData.data)
+      ? mapTransactionsToVMs(transactionsData.data)
+      : [];
   const totalCount = transactionsData?.meta.total_count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -180,9 +181,9 @@ export function TransactionsIsland() {
 
   // Get default form values for create mode
   const getDefaultFormValues = (): TransactionFormValues => {
-    const uncategorizedCategory = categories.find(
-      (cat) => cat.name.toLowerCase() === "uncategorized"
-    );
+    const uncategorizedCategory = Array.isArray(categories)
+      ? categories.find((cat) => cat.name.toLowerCase() === "uncategorized")
+      : undefined;
 
     return {
       amount_dollars: "",
@@ -197,9 +198,9 @@ export function TransactionsIsland() {
   const formInitialValues =
     modalMode === "edit" ? getInitialFormValues() : getDefaultFormValues();
 
-  const uncategorizedId = categories.find(
-    (cat) => cat.name.toLowerCase() === "uncategorized"
-  )?.id;
+  const uncategorizedId = Array.isArray(categories)
+    ? categories.find((cat) => cat.name.toLowerCase() === "uncategorized")?.id
+    : undefined;
 
   // Show loading or error states
   if (transactionsError) {

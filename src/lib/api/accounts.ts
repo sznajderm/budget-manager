@@ -1,4 +1,5 @@
 import type { AccountOption } from "@/lib/transactions/types";
+import type { AccountListResponse } from "@/types";
 
 const BASE_URL = "/api/rest/v1";
 
@@ -42,5 +43,6 @@ export async function fetchAccounts(): Promise<AccountOption[]> {
     }
   );
 
-  return handleResponse<AccountOption[]>(res);
+  const response = await handleResponse<AccountListResponse>(res);
+  return response.data;
 }

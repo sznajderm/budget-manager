@@ -49,27 +49,8 @@ export async function fetchTransactions(
     credentials: "include",
   });
 
-  const data = await handleResponse<TransactionDTO[]>(res);
-  
-  // Extract count from Content-Range header
-  const contentRange = res.headers.get("Content-Range");
-  let totalCount = 0;
-  
-  if (contentRange) {
-    const match = contentRange.match(/\/(\d+)$/);
-    if (match) {
-      totalCount = parseInt(match[1], 10);
-    }
-  }
-
-  return {
-    data,
-    meta: {
-      total_count: totalCount,
-      limit,
-      offset,
-    },
-  };
+  const response = await handleResponse<TransactionListResponse>(res);
+  return response;
 }
 
 /**

@@ -4,47 +4,52 @@ Before we begin, review the following information:
 
 1. Route API specification:
 <route_api_specification>
-#### Get Income Summary
-- **HTTP Method**: POST
-- **URL Path**: `/rest/v1/rpc/get_income_summary`
-- **Description**: Get total income for user
-- **Request Payload**: Same as Get Expense Summary
-- **Response Payload**: Same structure as Get Expense Summary
+#### List Accounts
+- **HTTP Method**: GET
+- **URL Path**: `/rest/v1/accounts?deleted_at=is.null&order=created_at.desc&limit=20&offset=0`
+- **Description**: Get user's active accounts with pagination
+- **Query Parameters**: 
+  - `limit` (integer, default: 20, max: 50)
+  - `offset` (integer, default: 0)
+- **Response Payload**:
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Checking Account",
+      "account_type": "checking",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "total_count": 5,
+    "limit": 20,
+    "offset": 0
+  }
+}
+```
 - **Success Codes**: 200 OK
 - **Error Codes**: 401 Unauthorized
 </route_api_specification>
 
 2. Related database resources:
 <related_db_resources>
-### transactions
-Core transaction records with integer amounts in cents.
+### accounts
+User financial accounts with soft delete support.
 
 ```sql
-CREATE TABLE transactions (
+CREATE TABLE accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    category_id UUID NULL REFERENCES categories(id) ON DELETE RESTRICT,
-    amount_cents money_cents NOT NULL,
-    transaction_type transaction_type_enum NOT NULL,
-    description TEXT NOT NULL,
-    transaction_date TIMESTAMPTZ NOT NULL,
+    name TEXT NOT NULL,
+    account_type account_type_enum NOT NULL,
+    deleted_at TIMESTAMPTZ NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     
-    CONSTRAINT transactions_description_not_empty CHECK (LENGTH(TRIM(description)) > 0),
-    CONSTRAINT transactions_user_owns_account CHECK (
-        NOT EXISTS (
-            SELECT 1 FROM accounts a 
-            WHERE a.id = account_id AND a.user_id != transactions.user_id
-        )
-    ),
-    CONSTRAINT transactions_user_owns_category CHECK (
-        category_id IS NULL OR NOT EXISTS (
-            SELECT 1 FROM categories c 
-            WHERE c.id = category_id AND c.user_id != transactions.user_id
-        )
-    )
+    CONSTRAINT accounts_name_not_empty CHECK (LENGTH(TRIM(name)) > 0)
 );
 ```
 </related_db_resources>
@@ -140,4 +145,4 @@ The final output should be a well-organized implementation plan in markdown form
 
 The final output should consist solely of the implementation plan in markdown format and should not duplicate or repeat any work done in the analysis section.
 
-Remember to save your implementation plan as .ai/endpoints/get-income-summary-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.
+Remember to save your implementation plan as .ai/endpoints/get-accounts-implementation-plan.md. Ensure the plan is detailed, clear, and provides comprehensive guidance for the development team.

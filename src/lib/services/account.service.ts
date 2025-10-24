@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { SupabaseClient } from "../../db/supabase.client";
-import type { AccountDTO, AccountType } from "../../types";
+import type { AccountDTO, AccountType, AccountListResponse } from "../../types";
 
 // Validation schema for account creation
 export const AccountCreateSchema = z.object({
@@ -13,6 +13,14 @@ export const AccountCreateSchema = z.object({
 });
 
 export type ValidatedAccountCreateCommand = z.infer<typeof AccountCreateSchema>;
+
+// Validation schema for list accounts query parameters
+export const AccountListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+export type ValidatedAccountListQuery = z.infer<typeof AccountListQuerySchema>;
 
 /**
  * Creates a new account for the authenticated user
@@ -86,5 +94,75 @@ export async function createAccount(
     // Fallback for unexpected errors
     console.error("Unexpected error in createAccount:", error);
     throw new Error("An unexpected error occurred while creating the account");
+  }
+}
+
+/**
+ * Lists all active accounts for the authenticated user with pagination
+ * @param supabase - Supabase client with user session
+ * @param userId - User ID from authenticated session
+ * @param queryParams - Validated query parameters for pagination
+ * @returns Promise<AccountListResponse> - List of accounts with pagination metadata
+ */
+export async function listAccounts(
+  supabase: SupabaseClient,
+  userId: string,
+  queryParams: ValidatedAccountListQuery
+): Promise<AccountListResponse> {
+  const { limit, offset } = queryParams;
+
+  try {
+    // Query accounts with pagination
+    const { data, error } = await supabase
+      .from("accounts")
+      .select("id, name, account_type, created_at, updated_at")
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("Database error fetching accounts:", error);
+      throw new Error("Failed to retrieve accounts due to database error");
+    }
+
+    // Query total count
+    const { count, error: countError } = await supabase
+      .from("accounts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .is("deleted_at", null);
+
+    if (countError) {
+      console.error("Database error counting accounts:", countError);
+      throw new Error("Failed to count accounts due to database error");
+    }
+
+    // Format response
+    const accounts: AccountDTO[] = (data || []).map((account) => ({
+      id: account.id,
+      name: account.name,
+      account_type: account.account_type as AccountType,
+      created_at: account.created_at,
+      updated_at: account.updated_at,
+    }));
+
+    return {
+      data: accounts,
+      meta: {
+        total_count: count || 0,
+        limit,
+        offset,
+      },
+    };
+  } catch (error) {
+    // Re-throw our custom errors
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    // Fallback for unexpected errors
+    console.error("Unexpected error in listAccounts:", error);
+    throw new Error("An unexpected error occurred while fetching accounts");
   }
 }

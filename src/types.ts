@@ -26,6 +26,12 @@ export type AccountUpdateCommand = Partial<
   Pick<TablesUpdate<'accounts'>, 'name'>
 >
 
+/** Response type for account list endpoint */
+export interface AccountListResponse {
+  data: AccountDTO[]
+  meta: PaginationMeta
+}
+
 /** Category DTOs & Commands */
 export type CategoryDTO = Omit<Tables<'categories'>, 'user_id'>
 

@@ -61,7 +61,7 @@ export const TransactionFormSchema = z.object({
   transaction_date_input: z.string().min(1, "Date/time is required"),
   account_id: z.string().uuid("Select an account"),
   category_id: z.string().uuid().nullable().optional(),
-  description: z.string().max(255, "Max 255 characters").optional().default(""),
+  description: z.string().min(1, "Description is required").max(255, "Max 255 characters"),
 });
 
 export type ValidatedTransactionForm = z.infer<typeof TransactionFormSchema>;

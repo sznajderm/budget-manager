@@ -217,13 +217,15 @@ export function TransactionForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">
+          Description <span className="text-red-500">*</span>
+        </Label>
         <Input
           id="description"
           type="text"
           value={formData.description}
           onChange={(e) => updateField("description", e.target.value)}
-          placeholder="Optional description"
+          placeholder="Description"
           maxLength={255}
           disabled={submitting}
           aria-invalid={!!errors.description}

@@ -122,3 +122,97 @@ export interface SummaryDTO {
   period_start: string
   period_end: string
 }
+
+/** OpenRouter Service Types */
+
+/** Message role types */
+export type ChatMessageRole = 'system' | 'user' | 'assistant'
+
+/** Chat message structure */
+export interface ChatMessage {
+  role: ChatMessageRole
+  content: string
+}
+
+/** JSON Schema definition for structured responses */
+export interface JsonSchema {
+  type: 'object'
+  properties: Record<string, unknown>
+  required?: string[]
+  additionalProperties?: boolean
+}
+
+/** Response format configuration for structured outputs */
+export interface ResponseFormat {
+  type: 'json_schema'
+  json_schema: {
+    name: string
+    strict: true
+    schema: JsonSchema
+  }
+}
+
+/** Chat completion request configuration */
+export interface ChatCompletionRequest {
+  messages: ChatMessage[]
+  model?: string
+  response_format?: ResponseFormat
+  temperature?: number
+  max_tokens?: number
+  top_p?: number
+  frequency_penalty?: number
+  presence_penalty?: number
+}
+
+/** Chat completion response from API */
+export interface ChatCompletionResponse {
+  id: string
+  model: string
+  created: number
+  choices: Array<{
+    index: number
+    message: ChatMessage
+    finish_reason: string
+  }>
+  usage: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
+}
+
+/** Streaming response chunk (for future use) */
+export interface ChatCompletionChunk {
+  id: string
+  model: string
+  created: number
+  choices: Array<{
+    index: number
+    delta: {
+      role?: ChatMessageRole
+      content?: string
+    }
+    finish_reason: string | null
+  }>
+}
+
+/** OpenRouter service configuration */
+export interface OpenRouterConfig {
+  apiKey: string
+  baseUrl?: string
+  defaultModel?: string
+  timeout?: number
+  maxRetries?: number
+}
+
+/** Model information (for getAvailableModels) */
+export interface ModelInfo {
+  id: string
+  name: string
+  description?: string
+  context_length?: number
+  pricing?: {
+    prompt: number
+    completion: number
+  }
+}

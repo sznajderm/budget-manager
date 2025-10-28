@@ -1,8 +1,8 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import AuthenticatedLayout from "@/layouts/AuthenticatedLayout.astro";
 import TransactionsWrapper from "@/components/TransactionsWrapper";
 ---
 
-<Layout title="Transactions - Budget Manager">
+<AuthenticatedLayout title="Transactions - Budget Manager">
   <TransactionsWrapper client:load />
-</Layout>
+</AuthenticatedLayout>

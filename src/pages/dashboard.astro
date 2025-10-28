@@ -1,8 +1,8 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import AuthenticatedLayout from "@/layouts/AuthenticatedLayout.astro";
 import DashboardWrapper from "@/components/dashboard/DashboardWrapper";
 ---
 
-<Layout title="Dashboard - Budget Manager">
+<AuthenticatedLayout title="Dashboard - Budget Manager">
   <DashboardWrapper client:load />
-</Layout>
+</AuthenticatedLayout>

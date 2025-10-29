@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import type { APIRoute } from 'astro'
-import { createClient } from '@supabase/supabase-js'
 import { 
   createCategory,
   listCategories,
@@ -22,28 +21,25 @@ const CreateCategorySchema = z.object({
 
 export const POST: APIRoute = async (context) => {
   try {
-    // For testing purposes, use service role client to bypass RLS
-    const supabaseUrl = import.meta.env.SUPABASE_URL
-    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+    // Get Supabase client from context (set by middleware)
+    const supabase = context.locals.supabase
     
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+    if (!supabase) {
+      return new Response(JSON.stringify({ error: 'Supabase client not available' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       })
     }
-    
-    // Create service role client that can bypass RLS
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
 
-    // For testing, hardcode the user ID from the JWT you were using
-    const userId = '59b474a9-8b09-4a80-9046-3bc7c0b482a9'
-    const user = { id: userId }
+    // Get authenticated user from context (set by middleware)
+    const user = context.locals.user
+    
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
 
     // Parse request body
     let requestBody: unknown
@@ -167,27 +163,27 @@ export const POST: APIRoute = async (context) => {
 
 export const GET: APIRoute = async (context) => {
   try {
-    // For testing purposes, use service role client to bypass RLS
-    const supabaseUrl = import.meta.env.SUPABASE_URL
-    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+    // Get Supabase client from context (set by middleware)
+    const supabase = context.locals.supabase
     
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+    if (!supabase) {
+      return new Response(JSON.stringify({ error: 'Supabase client not available' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       })
     }
-    
-    // Create service role client that can bypass RLS
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
 
-    // For testing, hardcode the user ID
-    const userId = '59b474a9-8b09-4a80-9046-3bc7c0b482a9'
+    // Get authenticated user from context (set by middleware)
+    const user = context.locals.user
+    
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
+    const userId = user.id
     
     // Parse and validate query parameters
     const url = new URL(context.request.url)

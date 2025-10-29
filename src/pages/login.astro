@@ -1,0 +1,12 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { LoginForm } from "../components/auth/LoginForm";
+
+export const prerender = false;
+---
+
+<Layout title="Logowanie - Budget Manager">
+  <main class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20">
+    <LoginForm client:load />
+  </main>
+</Layout>

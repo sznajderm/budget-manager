@@ -27,9 +27,15 @@ A web-based application that helps individual users consolidate and categorize e
 | [Shadcn/ui](https://ui.shadcn.com/) | - | Accessible component library for React UI |
 | **Backend** | | |
 | [Supabase](https://supabase.com/) | - | Complete backend solution with PostgreSQL database, BaaS SDK, and built-in user authentication |
-| **AI Integration** | | |
-| [OpenRouter.ai](https://openrouter.ai/) | - | Access to various AI models (OpenAI, Anthropic, Google) for transaction categorization with cost optimization |
-| **CI/CD & Hosting** | | |
+|| **AI Integration** | | |
+|| [OpenRouter.ai](https://openrouter.ai/) | - | Access to various AI models (OpenAI, Anthropic, Google) for transaction categorization with cost optimization |
+|| **Testing** | | |
+|| [Vitest](https://vitest.dev/) | - | Fast unit testing framework with TypeScript support |
+|| [@testing-library/react](https://testing-library.com/) | - | Testing utilities for React components |
+|| [MSW](https://mswjs.io/) | - | API mocking for integration tests |
+|| [Playwright](https://playwright.dev/) | - | End-to-end testing across Chromium, Firefox, and WebKit |
+|| [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) | - | Accessibility testing integration |
+|| **CI/CD & Hosting** | | |
 | GitHub Actions | - | CI/CD pipeline automation |
 | DigitalOcean | - | Application hosting via Docker containers |
 
@@ -82,6 +88,10 @@ npm run preview
 - `npm run lint` - Run ESLint to check code quality
 - `npm run lint:fix` - Automatically fix ESLint issues
 - `npm run format` - Format code using Prettier
+- `npm run test` - Run unit and integration tests with Vitest
+- `npm run test:ui` - Run tests with Vitest UI
+- `npm run test:coverage` - Generate test coverage report
+- `npm run test:e2e` - Run end-to-end tests with Playwright
 
 ## Project Scope
 

@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { SignupApiSchema } from '../../../lib/auth/validators';
 import { createSupabaseServerInstance } from '../../../lib/supabase.server';
+import { seedNewUser } from '../../../lib/services/user-seed.service';
 
 export const prerender = false;
 
@@ -95,6 +96,17 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // Check if email confirmation is required
     // If user.identities is empty, it means email confirmation is required
     const requiresEmailConfirmation = !data.user?.identities || data.user.identities.length === 0;
+
+    // Seed initial data for the new user (default account and categories)
+    if (data.user?.id) {
+      try {
+        await seedNewUser(supabase, data.user.id);
+      } catch (seedError) {
+        console.error('Failed to seed new user data:', seedError);
+        // Note: User account is already created, so we don't fail the signup
+        // The user can manually create their account and categories
+      }
+    }
 
     if (requiresEmailConfirmation) {
       // User needs to confirm email before they can log in

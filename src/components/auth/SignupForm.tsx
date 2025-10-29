@@ -45,20 +45,24 @@ export function SignupForm() {
       if (response.ok) {
         const data = await response.json();
         
-        if (response.status === 202) {
+        // Check if email confirmation is required (status 202)
+        if (response.status === 202 || data.requiresConfirmation) {
           setSuccessMessage(
-            "Sprawdź swoją skrzynkę pocztową i potwierdź adres email, aby dokończyć rejestrację."
+            "Registration successful!"
           );
+          // Clear form after successful registration
+          setFormData({ email: "", password: "", confirmPassword: "" });
         } else {
+          // Auto-confirmed - redirect to dashboard
           window.location.assign("/dashboard");
         }
       } else {
         const data = await response.json();
         
         if (response.status === 409) {
-          setServerError("Adres email jest już zajęty.");
+          setServerError("Email is already in use.");
         } else {
-          setServerError(data.error || "Wystąpił błąd podczas rejestracji.");
+          setServerError(data.error || "An error occurred during registration.");
         }
       }
     } catch (error) {

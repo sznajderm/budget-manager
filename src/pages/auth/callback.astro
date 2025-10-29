@@ -1,0 +1,38 @@
+---
+import { createSupabaseServerInstance } from "../../lib/supabase.server";
+
+export const prerender = false;
+
+// Handle the callback from Supabase after email confirmation
+const supabase = createSupabaseServerInstance({
+  cookies: Astro.cookies,
+  headers: Astro.request.headers,
+});
+
+const { searchParams } = new URL(Astro.request.url);
+const code = searchParams.get("code");
+const error = searchParams.get("error");
+const error_description = searchParams.get("error_description");
+
+// Handle error from Supabase
+if (error) {
+  console.error("Auth callback error:", error, error_description);
+  return Astro.redirect(`/login?error=${encodeURIComponent(error_description || error)}`);
+}
+
+// Exchange the code for a session
+if (code) {
+  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  
+  if (exchangeError) {
+    console.error("Code exchange error:", exchangeError);
+    return Astro.redirect(`/login?error=${encodeURIComponent("Nie udało się potwierdzić konta.")}`);
+  }
+  
+  // Successfully confirmed - redirect to login with success message
+  return Astro.redirect("/login?confirmed=true");
+}
+
+// No code or error - redirect to login
+return Astro.redirect("/login");
+---

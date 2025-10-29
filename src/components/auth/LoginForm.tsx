@@ -15,7 +15,22 @@ export function LoginForm() {
   });
 
   const [validationErrors, setValidationErrors] = useState<FieldErrorMap>({});
-  const [serverError, setServerError] = useState<string>("");
+  const [serverError, setServerError] = useState<string>(() => {
+    // Check for error in URL params (from auth callback)
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("error") || "";
+    }
+    return "";
+  });
+  const [successMessage, setSuccessMessage] = useState<string>(() => {
+    // Check for success message in URL params
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("confirmed") === "true" ? "Konto potwierdzone! Możesz się teraz zalogować." : "";
+    }
+    return "";
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,6 +100,12 @@ export function LoginForm() {
           {serverError && (
             <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-200 dark:border-red-900" role="alert">
               {serverError}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="p-3 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-200 dark:border-green-900" role="status">
+              {successMessage}
             </div>
           )}
 

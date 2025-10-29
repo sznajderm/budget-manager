@@ -2,11 +2,13 @@
 
 import type { SupabaseClient as SupabaseClientPkg } from '@supabase/supabase-js'
 import type { Database } from './db/database.types'
+import type { User } from './lib/auth/session.server'
 
 declare global {
   namespace App {
     interface Locals {
       supabase: SupabaseClientPkg<Database>
+      user?: User
     }
   }
 }

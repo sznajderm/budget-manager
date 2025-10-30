@@ -1,0 +1,80 @@
+import { type Page, type Locator, expect } from '@playwright/test';
+
+export class DashboardPage {
+  readonly page: Page;
+  readonly heading: Locator;
+  readonly startDateInput: Locator;
+  readonly endDateInput: Locator;
+  readonly applyButton: Locator;
+  readonly resetButton: Locator;
+  readonly expenseCard: Locator;
+  readonly incomeCard: Locator;
+  readonly errorAlert: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.heading = page.getByRole('heading', { name: /dashboard/i });
+    this.startDateInput = page.locator('#start-date');
+    this.endDateInput = page.locator('#end-date');
+    this.applyButton = page.getByRole('button', { name: /apply/i });
+    this.resetButton = page.getByRole('button', { name: /reset to current month/i });
+    this.expenseCard = page.locator('[aria-label="Summary cards"]').locator('div').filter({ hasText: 'Total Expenses' }).first();
+    this.incomeCard = page.locator('[aria-label="Summary cards"]').locator('div').filter({ hasText: 'Total Income' }).first();
+    this.errorAlert = page.locator('[role="alert"]');
+  }
+
+  async goto() {
+    await this.page.goto('/dashboard');
+  }
+
+  async waitForLoad() {
+    await this.heading.waitFor({ state: 'visible' });
+  }
+
+  async getExpenseTotal(): Promise<string> {
+    const text = await this.expenseCard.locator('.text-3xl').textContent();
+    return text?.trim() || '';
+  }
+
+  async getIncomeTotal(): Promise<string> {
+    const text = await this.incomeCard.locator('.text-3xl').textContent();
+    return text?.trim() || '';
+  }
+
+  async getExpenseTransactionCount(): Promise<number> {
+    const text = await this.expenseCard.locator('text=/\\d+ transactions/').textContent();
+    const match = text?.match(/(\d+) transactions/);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
+  async getIncomeTransactionCount(): Promise<number> {
+    const text = await this.incomeCard.locator('text=/\\d+ transactions/').textContent();
+    const match = text?.match(/(\d+) transactions/);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
+  async waitForExpenseData() {
+    await expect(this.expenseCard.locator('.text-3xl')).toBeVisible();
+  }
+
+  async waitForIncomeData() {
+    await expect(this.incomeCard.locator('.text-3xl')).toBeVisible();
+  }
+
+  async isLoadingExpense(): Promise<boolean> {
+    const loadingSkeleton = this.expenseCard.locator('[class*="animate-pulse"]');
+    return await loadingSkeleton.isVisible().catch(() => false);
+  }
+
+  async isLoadingIncome(): Promise<boolean> {
+    const loadingSkeleton = this.incomeCard.locator('[class*="animate-pulse"]');
+    return await loadingSkeleton.isVisible().catch(() => false);
+  }
+
+  async waitForDataToLoad() {
+    // Wait for loading skeletons to disappear
+    await this.page.waitForTimeout(1000); // Brief wait for data fetch
+    await expect(this.expenseCard.locator('[class*="animate-pulse"]')).not.toBeVisible({ timeout: 10000 });
+    await expect(this.incomeCard.locator('[class*="animate-pulse"]')).not.toBeVisible({ timeout: 10000 });
+  }
+}

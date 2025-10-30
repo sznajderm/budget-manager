@@ -11,7 +11,7 @@ export default defineConfig({
     ['junit', { outputFile: 'test-results/junit.xml' }],
   ],
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: 'http://localhost:3010',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -25,7 +25,7 @@ export default defineConfig({
 
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:4321',
+    url: 'http://localhost:3010',
     reuseExistingServer: !process.env.CI,
   },
 });

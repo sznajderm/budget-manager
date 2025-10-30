@@ -10,6 +10,8 @@ export default defineConfig({
     ['html'],
     ['junit', { outputFile: 'test-results/junit.xml' }],
   ],
+  globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts',
   use: {
     baseURL: 'http://localhost:3010',
     trace: 'on-first-retry',

@@ -29,7 +29,7 @@ Located in `e2e/page-objects/`:
 ### Commands
 
 ```bash
-# Run all E2E tests
+# Run all E2E tests (with automatic cleanup)
 npm run test:e2e
 
 # Run tests in UI mode (recommended for development)
@@ -43,6 +43,9 @@ npx playwright test --debug
 
 # Generate test report
 npx playwright show-report
+
+# Manually cleanup test users
+npm run cleanup:test-users
 ```
 
 ## Test Scenarios
@@ -165,6 +168,23 @@ Tests are configured for CI with:
 - Check if element exists in current viewport
 - Verify selector is correct
 
+## Test Data Cleanup
+
+E2E tests create real users and data in Supabase. An **automatic cleanup mechanism** removes test users after tests complete.
+
+### How It Works
+- **Before tests**: Cleans up leftover test users from previous runs
+- **After tests**: Removes test users created during the run
+- **Criteria**: Deletes any user with 'test' in their email (case-insensitive)
+- **Cascade**: Automatically removes all related records (accounts, transactions, categories)
+
+### Manual Cleanup
+```bash
+npm run cleanup:test-users
+```
+
+📖 See [CLEANUP.md](./CLEANUP.md) for detailed documentation.
+
 ## Best Practices
 
 ✅ **DO**
@@ -173,6 +193,7 @@ Tests are configured for CI with:
 - Add explicit waits for async operations
 - Test user flows, not implementation details
 - Generate unique test data per run
+- Use 'test' in email addresses for automatic cleanup
 
 ❌ **DON'T**
 - Use brittle CSS selectors
@@ -180,3 +201,4 @@ Tests are configured for CI with:
 - Test internal component state
 - Use fixed test data (causes conflicts)
 - Skip error handling tests
+- Create users without 'test' in email (won't be cleaned up)

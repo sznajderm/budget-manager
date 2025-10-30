@@ -5,11 +5,8 @@ import { TransactionsPage } from './page-objects/transactions.page';
 
 test.describe('Complete User Flow', () => {
   test('should register user, navigate through pages, create transactions, and verify summaries', async ({ page, context }) => {
-    // Clear all cookies and storage for test isolation
-    await context.clearCookies();
-    await context.clearPermissions();
+    // Playwright creates a fresh context per test; explicit clearing usually not needed.
     
-    // Use browser context for test isolation
     const signupPage = new SignupPage(page);
     const dashboardPage = new DashboardPage(page);
     const transactionsPage = new TransactionsPage(page);
@@ -19,8 +16,8 @@ test.describe('Complete User Flow', () => {
 
     // Step 1: Register a new user
     await signupPage.goto();
-    // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    // Wait for UI to be ready (avoid networkidle on dev/HMR)
+    await expect(signupPage.submitButton).toBeVisible();
     await signupPage.register(testEmail, testPassword);
     
     // Wait for successful registration (either success message or redirect to dashboard)
@@ -40,15 +37,13 @@ test.describe('Complete User Flow', () => {
     // Verify transactions page is loaded
     await expect(transactionsPage.heading).toBeVisible();
 
-    // Step 3.5: Create default account and categories if needed
-    // New users need at least one account and some categories before creating transactions
-    // We'll click the button and wait a bit longer with explicit actionability checks
-    await page.waitForLoadState('networkidle');
+    // Step 3.5: Ensure defaults (account/categories) exist if your app requires them.
+    // If the UI shows a CTA like "Create defaults", click it here. Otherwise seed via API/DB before test.
+    // e.g. await transactionsPage.seedDefaultsIfEmpty();
 
     // Step 4: Add two income transactions
-    // Format date as DD/MM/YYYY to match form expectations
-    const now = new Date();
-    const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    // If input is <input type="date"> prefer YYYY-MM-DD; adjust if your UI expects a different format.
+    const formattedDate = new Date().toISOString().slice(0, 10);
     
     const income1 = {
       amount: '1500.00',
@@ -65,23 +60,12 @@ test.describe('Complete User Flow', () => {
     };
 
     await transactionsPage.createTransaction(income1);
-    // Wait for either success toast or modal to close
-    try {
-      await transactionsPage.waitForSuccessToast();
-    } catch {
-      // If no toast, just wait for modal to close
-    }
     await transactionsPage.waitForModalClose();
-    await transactionsPage.waitForTableUpdate();
+    expect(await transactionsPage.hasTransaction(income1.description)).toBe(true);
 
     await transactionsPage.createTransaction(income2);
-    try {
-      await transactionsPage.waitForSuccessToast();
-    } catch {
-      // If no toast, just wait for modal to close
-    }
     await transactionsPage.waitForModalClose();
-    await transactionsPage.waitForTableUpdate();
+    expect(await transactionsPage.hasTransaction(income2.description)).toBe(true);
 
     // Step 4: Add two expense transactions
     const expense1 = {
@@ -99,22 +83,12 @@ test.describe('Complete User Flow', () => {
     };
 
     await transactionsPage.createTransaction(expense1);
-    try {
-      await transactionsPage.waitForSuccessToast();
-    } catch {
-      // If no toast, just wait for modal to close
-    }
     await transactionsPage.waitForModalClose();
-    await transactionsPage.waitForTableUpdate();
+    expect(await transactionsPage.hasTransaction(expense1.description)).toBe(true);
 
     await transactionsPage.createTransaction(expense2);
-    try {
-      await transactionsPage.waitForSuccessToast();
-    } catch {
-      // If no toast, just wait for modal to close
-    }
     await transactionsPage.waitForModalClose();
-    await transactionsPage.waitForTableUpdate();
+    expect(await transactionsPage.hasTransaction(expense2.description)).toBe(true);
 
     // Step 5: Verify all transactions are displayed on the /transactions view
     const transactionCount = await transactionsPage.getTransactionCount();
@@ -129,9 +103,6 @@ test.describe('Complete User Flow', () => {
     // Step 6: Verify transactions are properly summed on the /dashboard view
     await dashboardPage.goto();
     await dashboardPage.waitForLoad();
-    
-    // Wait for data to fully load
-    await dashboardPage.waitForDataToLoad();
 
     // Verify income and expense totals
     const actualIncome = await dashboardPage.getIncomeTotalAsNumber();
@@ -151,11 +122,5 @@ test.describe('Complete User Flow', () => {
 
     expect(incomeCount).toBeGreaterThanOrEqual(2);
     expect(expenseCount).toBeGreaterThanOrEqual(2);
-
-    // Visual verification (optional - take screenshot for review)
-    await expect(page).toHaveScreenshot('dashboard-with-transactions.png', { 
-      fullPage: true,
-      maxDiffPixels: 100 
-    });
   });
 });

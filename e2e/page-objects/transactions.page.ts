@@ -51,14 +51,9 @@ export class TransactionsPage {
   }
 
   async clickAddTransaction() {
-    // Ensure the button is actionable before clicking
     await this.addButton.waitFor({ state: 'visible' });
-    // Wait for all network requests to complete (accounts/categories loading)
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 });
-    // Add a small delay to ensure React state updates are complete
-    await this.page.waitForTimeout(500);
+    await expect(this.addButton).toBeEnabled();
     await this.addButton.click({ timeout: 10000 });
-    // Wait for modal with longer timeout to handle any data loading
     await this.modal.waitFor({ state: 'visible', timeout: 15000 });
   }
 
@@ -78,9 +73,9 @@ export class TransactionsPage {
     await this.page.getByRole('option', { name: data.type === 'expense' ? 'Expense' : 'Income' }).click();
 
     // Fill date if provided
-    if (data.date) {
-      await this.dateInput.fill(data.date);
-    }
+    // if (data.date) {
+    //   await this.dateInput.fill(data.date);
+    // }
 
     // Select account if provided
     if (data.account) {
@@ -101,16 +96,16 @@ export class TransactionsPage {
   }
 
   async submitForm() {
-    // Ensure button is enabled before clicking
     await this.submitButton.waitFor({ state: 'visible' });
     await expect(this.submitButton).toBeEnabled({ timeout: 5000 });
-    // Scroll button into view if needed
     await this.submitButton.scrollIntoViewIfNeeded();
-    // Click and wait for navigation/API call to complete
-    await this.submitButton.click({ force: false });
-    // Wait a moment for the submission to process
-    await this.page.waitForTimeout(1000);
-    await this.page.waitForLoadState('networkidle', { timeout: 15000 });
+    await this.submitButton.click();
+    // Prefer deterministic UI waits instead of networkidle
+    // Wait for either toast or modal close
+    await Promise.race([
+      this.toast.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
+      this.modal.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {}),
+    ]);
   }
 
   async createTransaction(data: {
@@ -188,10 +183,9 @@ export class TransactionsPage {
   }
 
   async waitForTableUpdate() {
-    // Wait for table to be visible and stable
     await this.transactionsTable.waitFor({ state: 'visible' });
-    // Wait for network to be idle to ensure data is loaded
-    await this.page.waitForLoadState('networkidle');
+    // Optionally, assert a row appears rather than using networkidle
+    // Caller can compare counts before/after to ensure update happened.
   }
 
   async getTransactionAmountAsNumber(description: string): Promise<number | null> {

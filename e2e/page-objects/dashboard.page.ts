@@ -71,12 +71,6 @@ export class DashboardPage {
     return await loadingSkeleton.isVisible().catch(() => false);
   }
 
-  async waitForDataToLoad() {
-    // Wait for loading skeletons to disappear
-    await expect(this.expenseCard.locator('[class*="animate-pulse"]')).not.toBeVisible({ timeout: 10000 });
-    await expect(this.incomeCard.locator('[class*="animate-pulse"]')).not.toBeVisible({ timeout: 10000 });
-  }
-
   async setDateRange(startDate: string, endDate: string) {
     await this.startDateInput.fill(startDate);
     await this.endDateInput.fill(endDate);
@@ -84,12 +78,10 @@ export class DashboardPage {
 
   async applyDateFilter() {
     await this.applyButton.click();
-    await this.waitForDataToLoad();
   }
 
   async resetDateFilter() {
     await this.resetButton.click();
-    await this.waitForDataToLoad();
   }
 
   async filterByDateRange(startDate: string, endDate: string) {

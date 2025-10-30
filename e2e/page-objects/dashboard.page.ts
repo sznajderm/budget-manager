@@ -73,8 +73,47 @@ export class DashboardPage {
 
   async waitForDataToLoad() {
     // Wait for loading skeletons to disappear
-    await this.page.waitForTimeout(1000); // Brief wait for data fetch
     await expect(this.expenseCard.locator('[class*="animate-pulse"]')).not.toBeVisible({ timeout: 10000 });
     await expect(this.incomeCard.locator('[class*="animate-pulse"]')).not.toBeVisible({ timeout: 10000 });
+  }
+
+  async setDateRange(startDate: string, endDate: string) {
+    await this.startDateInput.fill(startDate);
+    await this.endDateInput.fill(endDate);
+  }
+
+  async applyDateFilter() {
+    await this.applyButton.click();
+    await this.waitForDataToLoad();
+  }
+
+  async resetDateFilter() {
+    await this.resetButton.click();
+    await this.waitForDataToLoad();
+  }
+
+  async filterByDateRange(startDate: string, endDate: string) {
+    await this.setDateRange(startDate, endDate);
+    await this.applyDateFilter();
+  }
+
+  async getExpenseTotalAsNumber(): Promise<number> {
+    const text = await this.getExpenseTotal();
+    return parseFloat(text.replace(/[^0-9.-]/g, ''));
+  }
+
+  async getIncomeTotalAsNumber(): Promise<number> {
+    const text = await this.getIncomeTotal();
+    return parseFloat(text.replace(/[^0-9.-]/g, ''));
+  }
+
+  async getNetTotal(): Promise<number> {
+    const income = await this.getIncomeTotalAsNumber();
+    const expense = await this.getExpenseTotalAsNumber();
+    return income - expense;
+  }
+
+  async isErrorVisible(): Promise<boolean> {
+    return await this.errorAlert.isVisible().catch(() => false);
   }
 }

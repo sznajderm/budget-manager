@@ -35,8 +35,6 @@ export class SignupPage {
     await this.submitButton.waitFor({ state: 'visible' });
     await expect(this.submitButton).toBeEnabled();
     await this.submitButton.click();
-    // Wait a moment for the form to process
-    await this.page.waitForTimeout(500);
   }
 
   async register(email: string, password: string, confirmPassword?: string) {
@@ -54,5 +52,15 @@ export class SignupPage {
 
   async isSubmitButtonDisabled(): Promise<boolean> {
     return await this.submitButton.isDisabled();
+  }
+
+  async getErrorMessageText(): Promise<string> {
+    await this.waitForErrorMessage();
+    return await this.errorMessage.textContent() || '';
+  }
+
+  async getSuccessMessageText(): Promise<string> {
+    await this.waitForSuccessMessage();
+    return await this.successMessage.textContent() || '';
   }
 }

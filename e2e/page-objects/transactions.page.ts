@@ -21,7 +21,8 @@ export class TransactionsPage {
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading', { name: /^transactions$/i });
-    this.addButton = page.getByRole('button', { name: /add transaction/i });
+    // Use .first() to select the header button when there are multiple Add Transaction buttons
+    this.addButton = page.getByRole('button', { name: /add transaction/i }).first();
     this.transactionsTable = page.locator('table').first();
     
     // Modal elements
@@ -50,8 +51,15 @@ export class TransactionsPage {
   }
 
   async clickAddTransaction() {
-    await this.addButton.click();
-    await this.modal.waitFor({ state: 'visible' });
+    // Ensure the button is actionable before clicking
+    await this.addButton.waitFor({ state: 'visible' });
+    // Wait for all network requests to complete (accounts/categories loading)
+    await this.page.waitForLoadState('networkidle', { timeout: 10000 });
+    // Add a small delay to ensure React state updates are complete
+    await this.page.waitForTimeout(500);
+    await this.addButton.click({ timeout: 10000 });
+    // Wait for modal with longer timeout to handle any data loading
+    await this.modal.waitFor({ state: 'visible', timeout: 15000 });
   }
 
   async fillTransactionForm(data: {
@@ -93,7 +101,16 @@ export class TransactionsPage {
   }
 
   async submitForm() {
-    await this.submitButton.click();
+    // Ensure button is enabled before clicking
+    await this.submitButton.waitFor({ state: 'visible' });
+    await expect(this.submitButton).toBeEnabled({ timeout: 5000 });
+    // Scroll button into view if needed
+    await this.submitButton.scrollIntoViewIfNeeded();
+    // Click and wait for navigation/API call to complete
+    await this.submitButton.click({ force: false });
+    // Wait a moment for the submission to process
+    await this.page.waitForTimeout(1000);
+    await this.page.waitForLoadState('networkidle', { timeout: 15000 });
   }
 
   async createTransaction(data: {
@@ -114,14 +131,8 @@ export class TransactionsPage {
   }
 
   async waitForSuccessToast() {
-    try {
-      await expect(this.toast).toBeVisible({ timeout: 5000 });
-      await expect(this.toast).toContainText(/success/i);
-    } catch (error) {
-      // Toast might have appeared and disappeared quickly
-      // Check if modal is closed as alternative success indicator
-      console.log('Toast not visible, checking if modal closed as success indicator');
-    }
+    await expect(this.toast).toBeVisible({ timeout: 5000 });
+    await expect(this.toast).toContainText(/success/i, { timeout: 3000 });
   }
 
   async getTransactionRows() {
@@ -177,8 +188,60 @@ export class TransactionsPage {
   }
 
   async waitForTableUpdate() {
-    // Wait for any loading indicators to disappear
-    await this.page.waitForTimeout(500);
+    // Wait for table to be visible and stable
     await this.transactionsTable.waitFor({ state: 'visible' });
+    // Wait for network to be idle to ensure data is loaded
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  async getTransactionAmountAsNumber(description: string): Promise<number | null> {
+    const amountText = await this.getTransactionAmount(description);
+    if (!amountText) return null;
+    return parseFloat(amountText.replace(/[^0-9.-]/g, ''));
+  }
+
+  async getAllTransactions(): Promise<Array<{ description: string; amount: string; type: string }>> {
+    const rows = await this.getTransactionRows();
+    const count = await rows.count();
+    const transactions = [];
+
+    for (let i = 0; i < count; i++) {
+      const row = rows.nth(i);
+      const cells = await row.locator('td').all();
+      if (cells.length > 0) {
+        const description = await cells[0]?.textContent() || '';
+        const amount = await cells[1]?.textContent() || '';
+        const type = await cells[2]?.textContent() || '';
+        transactions.push({ description: description.trim(), amount: amount.trim(), type: type.trim() });
+      }
+    }
+
+    return transactions;
+  }
+
+  async deleteTransaction(description: string) {
+    const row = await this.findTransactionByDescription(description);
+    if (!row) throw new Error(`Transaction with description "${description}" not found`);
+    
+    const deleteButton = row.getByRole('button', { name: /delete/i });
+    await deleteButton.click();
+  }
+
+  async editTransaction(description: string) {
+    const row = await this.findTransactionByDescription(description);
+    if (!row) throw new Error(`Transaction with description "${description}" not found`);
+    
+    const editButton = row.getByRole('button', { name: /edit/i });
+    await editButton.click();
+    await this.modal.waitFor({ state: 'visible' });
+  }
+
+  async isTableEmpty(): Promise<boolean> {
+    const count = await this.getTransactionCount();
+    return count === 0;
+  }
+
+  async hasTransaction(description: string): Promise<boolean> {
+    return await this.verifyTransactionExists(description);
   }
 }

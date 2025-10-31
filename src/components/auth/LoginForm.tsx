@@ -154,7 +154,7 @@ export function LoginForm() {
               href="/forgot-password"
               className="text-sm text-primary hover:underline"
             >
-              Zapomniałeś hasła?
+              Zapomniałeś hasła? (Ta funkcjonalność nie działa)
             </a>
           </div>
 

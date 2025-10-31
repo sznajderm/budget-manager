@@ -100,8 +100,8 @@ export function SignupForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Rejestracja</CardTitle>
-        <CardDescription>Utwórz nowe konto</CardDescription>
+        <CardTitle>Sign Up</CardTitle>
+        <CardDescription>Create a new account</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -128,7 +128,8 @@ export function SignupForm() {
               onChange={(e) => updateField("email", e.target.value)}
               disabled={submitting || !!successMessage}
               aria-invalid={!!validationErrors.email}
-              placeholder="twoj@email.com"
+              placeholder="your@email.com"
+              data-testid="signup-email-input"
             />
             {validationErrors.email && (
               <p className="text-sm text-red-600" role="alert">
@@ -139,7 +140,7 @@ export function SignupForm() {
 
           <div className="space-y-2">
             <Label htmlFor="password">
-              Hasło <span className="text-red-500">*</span>
+              Password <span className="text-red-500">*</span>
             </Label>
             <Input
               id="password"
@@ -149,6 +150,7 @@ export function SignupForm() {
               disabled={submitting || !!successMessage}
               aria-invalid={!!validationErrors.password}
               placeholder="••••••••"
+              data-testid="signup-password-input"
             />
             {validationErrors.password && (
               <p className="text-sm text-red-600" role="alert">
@@ -156,13 +158,13 @@ export function SignupForm() {
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              Min. 8 znaków, zawierające literę i cyfrę
+              Minimum 8 characters, including a letter and a number
             </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">
-              Potwierdź hasło <span className="text-red-500">*</span>
+              Confirm Password <span className="text-red-500">*</span>
             </Label>
             <Input
               id="confirmPassword"
@@ -172,6 +174,7 @@ export function SignupForm() {
               disabled={submitting || !!successMessage}
               aria-invalid={!!validationErrors.confirmPassword}
               placeholder="••••••••"
+              data-testid="signup-confirm-password-input"
             />
             {validationErrors.confirmPassword && (
               <p className="text-sm text-red-600" role="alert">
@@ -184,14 +187,15 @@ export function SignupForm() {
             type="submit"
             disabled={submitting || !!successMessage}
             className="w-full"
+            data-testid="signup-submit-button"
           >
-            {submitting ? "Rejestracja..." : "Zarejestruj się"}
+            {submitting ? "Signing up..." : "Sign up"}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground pt-2">
-            Masz już konto?{" "}
+            Already have an account?{" "}
             <a href="/login" className="text-primary hover:underline">
-              Zaloguj się
+              Sign in
             </a>
           </div>
         </form>

@@ -10,10 +10,9 @@ export class SigninPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.locator('#email');
-    this.passwordInput = page.locator('#password');
-    // Support both Polish and English button labels
-    this.submitButton = page.getByRole('button', { name: /zaloguj się|log in/i });
+    this.emailInput = page.getByTestId('login-email-input');
+    this.passwordInput = page.getByTestId('login-password-input');
+    this.submitButton = page.getByTestId('login-submit-button');
     this.errorMessage = page.locator('[role="alert"]').first();
     this.signupLink = page.getByRole('link', { name: /zarejestruj się|sign up/i });
   }

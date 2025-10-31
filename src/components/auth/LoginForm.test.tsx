@@ -19,8 +19,8 @@ describe('LoginForm', () => {
   describe('Rendering', () => {
     it('should render login form with title and description', () => {
       render(<LoginForm />);
-      expect(screen.getByText('Logowanie')).toBeInTheDocument();
-      expect(screen.getByText('Wprowadź swoje dane, aby się zalogować')).toBeInTheDocument();
+      expect(screen.getByText('Login')).toBeInTheDocument();
+      expect(screen.getByText('Enter your credentials to sign in')).toBeInTheDocument();
     });
 
     it('should render email input field', () => {
@@ -32,26 +32,26 @@ describe('LoginForm', () => {
 
     it('should render password input field', () => {
       render(<LoginForm />);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
       expect(passwordInput).toBeInTheDocument();
       expect(passwordInput).toHaveAttribute('type', 'password');
     });
 
     it('should render submit button', () => {
       render(<LoginForm />);
-      const submitButton = screen.getByRole('button', { name: /zaloguj się/i });
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
       expect(submitButton).toBeInTheDocument();
     });
 
     it('should render forgot password link', () => {
       render(<LoginForm />);
-      const link = screen.getByRole('link', { name: /zapomniałeś hasła/i });
+      const link = screen.getByRole('link', { name: /forgot password/i });
       expect(link).toHaveAttribute('href', '/forgot-password');
     });
 
     it('should render signup link', () => {
       render(<LoginForm />);
-      const link = screen.getByRole('link', { name: /zarejestruj się/i });
+      const link = screen.getByRole('link', { name: /sign up/i });
       expect(link).toHaveAttribute('href', '/signup');
     });
   });
@@ -71,7 +71,7 @@ describe('LoginForm', () => {
       const user = userEvent.setup();
       render(<LoginForm />);
 
-      const passwordInput = screen.getByLabelText(/hasło/i) as HTMLInputElement;
+      const passwordInput = screen.getByLabelText(/password/i) as HTMLInputElement;
       await user.type(passwordInput, 'Password123');
 
       expect(passwordInput.value).toBe('Password123');
@@ -82,7 +82,7 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i) as HTMLInputElement;
-      const passwordInput = screen.getByLabelText(/hasło/i) as HTMLInputElement;
+      const passwordInput = screen.getByLabelText(/password/i) as HTMLInputElement;
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'Password123');
@@ -98,12 +98,12 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'short');
 
-      const submitButton = screen.getByRole('button', { name: /zaloguj się/i });
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -115,10 +115,10 @@ describe('LoginForm', () => {
       const user = userEvent.setup();
       render(<LoginForm />);
 
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
       await user.type(passwordInput, 'ValidPassword123');
 
-      const submitButton = screen.getByRole('button', { name: /zaloguj się/i });
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -133,7 +133,7 @@ describe('LoginForm', () => {
       const emailInput = screen.getByLabelText(/email/i);
       await user.type(emailInput, 'user@example.com');
 
-      const submitButton = screen.getByRole('button', { name: /zaloguj się/i });
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -153,11 +153,11 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'Password123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       // Wait for server error
       await waitFor(() => {
@@ -185,11 +185,11 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
         expect(window.location.assign).toHaveBeenCalledWith('/dashboard');
@@ -213,11 +213,11 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
@@ -238,8 +238,8 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
-      const submitButton = screen.getByRole('button', { name: /zaloguj się/i });
+      const passwordInput = screen.getByLabelText(/password/i);
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
@@ -252,7 +252,7 @@ describe('LoginForm', () => {
       // During submission, button should be disabled and show loading text
       await waitFor(() => {
         expect(submitButton).toBeDisabled();
-        expect(screen.getByRole('button', { name: /logowanie\.\.\./i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /signing in\.\.\./i })).toBeInTheDocument();
       });
     });
 
@@ -266,14 +266,14 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /logowanie\.\.\./i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /signing in\.\.\./i })).toBeInTheDocument();
       });
     });
 
@@ -286,11 +286,11 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       // Validation errors should be cleared
       await waitFor(() => {
@@ -304,20 +304,20 @@ describe('LoginForm', () => {
     it('should display server error on failed login', async () => {
       const user = userEvent.setup();
       (global.fetch as any).mockResolvedValueOnce(
-        new Response(JSON.stringify({ error: 'Nieprawidłowe dane logowania.' }), { status: 401 })
+        new Response(JSON.stringify({ error: 'Invalid login credentials.' }), { status: 401 })
       );
 
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'WrongPassword123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Nieprawidłowe dane logowania.')).toBeInTheDocument();
+        expect(screen.getByText('Invalid login credentials.')).toBeInTheDocument();
       });
     });
 
@@ -330,14 +330,14 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Nieprawidłowe dane logowania.')).toBeInTheDocument();
+        expect(screen.getByText('Invalid login credentials.')).toBeInTheDocument();
       });
     });
 
@@ -350,11 +350,11 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
+      const passwordInput = screen.getByLabelText(/password/i);
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
-      await user.click(screen.getByRole('button', { name: /zaloguj się/i }));
+      await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
         const alertDiv = screen.getByRole('alert', { hidden: false });
@@ -377,7 +377,7 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const statusDiv = screen.getByRole('status');
-      expect(statusDiv).toHaveTextContent('Konto potwierdzone! Możesz się teraz zalogować.');
+      expect(statusDiv).toHaveTextContent('Account confirmed! You can now log in.');
     });
 
     it('should not display success message if confirmed is not true', () => {
@@ -400,7 +400,7 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const statusDiv = screen.getByRole('status');
-      expect(statusDiv).toHaveTextContent('Konto potwierdzone! Możesz się teraz zalogować.');
+      expect(statusDiv).toHaveTextContent('Account confirmed! You can now log in.');
     });
   });
 
@@ -415,12 +415,12 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i) as HTMLInputElement;
-      const passwordInput = screen.getByLabelText(/hasło/i) as HTMLInputElement;
+      const passwordInput = screen.getByLabelText(/password/i) as HTMLInputElement;
 
       await user.type(emailInput, 'user@example.com');
       await user.type(passwordInput, 'ValidPass123');
 
-      const submitButton = screen.getByRole('button', { name: /zaloguj się/i });
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
       fireEvent.click(submitButton);
 
       await waitFor(() => {
@@ -432,7 +432,7 @@ describe('LoginForm', () => {
     it('should show placeholder text in input fields', () => {
       render(<LoginForm />);
 
-      const emailInput = screen.getByPlaceholderText('twoj@email.com');
+      const emailInput = screen.getByPlaceholderText('your@email.com');
       const passwordInput = screen.getByPlaceholderText('••••••••');
 
       expect(emailInput).toBeInTheDocument();
@@ -461,8 +461,8 @@ describe('LoginForm', () => {
       render(<LoginForm />);
 
       const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/hasło/i);
-      const submitButton = screen.getByRole('button', { name: /zaloguj się/i });
+      const passwordInput = screen.getByLabelText(/password/i);
+      const submitButton = screen.getByRole('button', { name: /sign in/i });
 
       // First attempt with wrong password
       await user.type(emailInput, 'user@example.com');

@@ -1,6 +1,7 @@
 name = "budget-manager"
 main = "dist/_worker.js"
 compatibility_date = "2025-10-31"
+compatibility_flags = ["nodejs_compat"]
 
 [site]
 bucket = "dist"

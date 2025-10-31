@@ -1,11 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PaginationControlsProps {
   page: number;
@@ -69,10 +63,7 @@ export function PaginationControls({
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">Items per page:</span>
-        <Select
-          value={pageSize.toString()}
-          onValueChange={(value) => onPageSizeChange(Number(value) as 20 | 50)}
-        >
+        <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value) as 20 | 50)}>
           <SelectTrigger className="w-20">
             <SelectValue />
           </SelectTrigger>
@@ -106,10 +97,7 @@ export function PaginationControls({
         <div className="flex gap-1">
           {pageNumbers.map((pageNum, idx) =>
             pageNum === "ellipsis" ? (
-              <span
-                key={`ellipsis-${idx}`}
-                className="px-2 py-1 text-muted-foreground"
-              >
+              <span key={`ellipsis-${idx}`} className="px-2 py-1 text-muted-foreground">
                 …
               </span>
             ) : (
@@ -150,10 +138,7 @@ export function PaginationControls({
       <div className="text-sm text-muted-foreground">
         {totalCount === 0
           ? "No items"
-          : `${(page - 1) * pageSize + 1}–${Math.min(
-              page * pageSize,
-              totalCount
-            )} of ${totalCount}`}
+          : `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalCount)} of ${totalCount}`}
       </div>
     </div>
   );

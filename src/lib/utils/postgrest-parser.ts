@@ -16,46 +16,46 @@ export interface PostgRESTFilter {
  * @returns string | null - The extracted transaction ID or null if not found/invalid format
  */
 export function parseTransactionIdFromQuery(queryParams: URLSearchParams): string | null {
-  const idParam = queryParams.get('id');
-  
+  const idParam = queryParams.get("id");
+
   if (!idParam) {
     return null;
   }
-  
+
   // Check if it matches PostgREST format: eq.{uuid}
   const postgrestMatch = idParam.match(/^eq\.(.+)$/);
   if (postgrestMatch && postgrestMatch[1]) {
     return postgrestMatch[1];
   }
-  
+
   return null;
 }
 
 /**
  * Generic PostgREST filter parser for future extensibility
- * @param queryParams - URLSearchParams object from request URL  
+ * @param queryParams - URLSearchParams object from request URL
  * @returns PostgRESTFilter[] - Array of parsed filters
  */
 export function parsePostgRESTFilters(queryParams: URLSearchParams): PostgRESTFilter[] {
   const filters: PostgRESTFilter[] = [];
-  
+
   for (const [key, value] of queryParams.entries()) {
     // Skip non-filter parameters (like limit, offset, order)
-    if (['limit', 'offset', 'order', 'select'].includes(key)) {
+    if (["limit", "offset", "order", "select"].includes(key)) {
       continue;
     }
-    
+
     // Parse PostgREST filter format: column=operator.value
     const filterMatch = value.match(/^([^.]+)\.(.*)$/);
     if (filterMatch) {
       filters.push({
         column: key,
         operator: filterMatch[1],
-        value: filterMatch[2]
+        value: filterMatch[2],
       });
     }
   }
-  
+
   return filters;
 }
 

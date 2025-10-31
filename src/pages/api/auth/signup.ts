@@ -1,8 +1,8 @@
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
-import { SignupApiSchema } from '../../../lib/auth/validators';
-import { createSupabaseServerInstance } from '../../../lib/supabase.server';
-import { seedNewUser } from '../../../lib/services/user-seed.service';
+import type { APIRoute } from "astro";
+import { z } from "zod";
+import { SignupApiSchema } from "../../../lib/auth/validators";
+import { createSupabaseServerInstance } from "../../../lib/supabase.server";
+import { seedNewUser } from "../../../lib/services/user-seed.service";
 
 export const prerender = false;
 
@@ -13,13 +13,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     try {
       requestBody = await request.json();
     } catch {
-      return new Response(
-        JSON.stringify({ error: 'Invalid JSON in request body' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Invalid JSON in request body" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Validate input using Zod schema
@@ -28,16 +25,16 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       validatedData = SignupApiSchema.parse(requestBody);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errorMessages = error.errors.map((e) => e.message).join(', ');
+        const errorMessages = error.errors.map((e) => e.message).join(", ");
         return new Response(JSON.stringify({ error: errorMessages }), {
           status: 422,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         });
       }
 
-      return new Response(JSON.stringify({ error: 'Invalid input data' }), {
+      return new Response(JSON.stringify({ error: "Invalid input data" }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -57,40 +54,31 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
 
     if (error) {
-      console.error('Signup failed:', {
+      console.error("Signup failed:", {
         email: validatedData.email,
         error: error.message,
       });
 
       // Map Supabase errors to user-friendly messages
-      if (error.message.includes('User already registered')) {
-        return new Response(
-          JSON.stringify({ error: 'Email is already in use.' }),
-          {
-            status: 409,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
+      if (error.message.includes("User already registered")) {
+        return new Response(JSON.stringify({ error: "Email is already in use." }), {
+          status: 409,
+          headers: { "Content-Type": "application/json" },
+        });
       }
 
-      if (error.message.includes('Password should be')) {
-        return new Response(
-          JSON.stringify({ error: 'Password does not meet requirements.' }),
-          {
-            status: 422,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
+      if (error.message.includes("Password should be")) {
+        return new Response(JSON.stringify({ error: "Password does not meet requirements." }), {
+          status: 422,
+          headers: { "Content-Type": "application/json" },
+        });
       }
 
       // Generic error
-      return new Response(
-        JSON.stringify({ error: 'Failed to create account.' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Failed to create account." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Check if email confirmation is required
@@ -102,7 +90,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       try {
         await seedNewUser(supabase, data.user.id);
       } catch (seedError) {
-        console.error('Failed to seed new user data:', seedError);
+        console.error("Failed to seed new user data:", seedError);
         // Note: User account is already created, so we don't fail the signup
         // The user can manually create their account and categories
       }
@@ -112,12 +100,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       // User needs to confirm email before they can log in
       return new Response(
         JSON.stringify({
-          message: 'Check your email inbox',
+          message: "Check your email inbox",
           requiresConfirmation: true,
         }),
         {
           status: 202,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -125,7 +113,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // Success - account created and user is auto-confirmed
     return new Response(
       JSON.stringify({
-        message: 'Account created',
+        message: "Account created",
         user: {
           id: data.user?.id,
           email: data.user?.email,
@@ -133,17 +121,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }),
       {
         status: 201,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
-    console.error('Unhandled error in POST /api/auth/signup:', error);
-    return new Response(
-      JSON.stringify({ error: 'An unexpected error occurred.' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    console.error("Unhandled error in POST /api/auth/signup:", error);
+    return new Response(JSON.stringify({ error: "An unexpected error occurred." }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };

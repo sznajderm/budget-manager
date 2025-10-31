@@ -23,7 +23,7 @@ export function LoginForm() {
     }
     return "";
   });
-  const [successMessage, setSuccessMessage] = useState<string>(() => {
+  const [successMessage] = useState<string>(() => {
     // Check for success message in URL params
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -72,17 +72,12 @@ export function LoginForm() {
     }
   };
 
-  const updateField = <K extends keyof LoginFormValues>(
-    field: K,
-    value: LoginFormValues[K]
-  ) => {
+  const updateField = <K extends keyof LoginFormValues>(field: K, value: LoginFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (validationErrors[field]) {
-      setValidationErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [field]: _, ...rest } = validationErrors;
+      setValidationErrors(rest);
     }
     if (serverError) {
       setServerError("");
@@ -98,13 +93,19 @@ export function LoginForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {serverError && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-200 dark:border-red-900" role="alert">
+            <div
+              className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-200 dark:border-red-900"
+              role="alert"
+            >
               {serverError}
             </div>
           )}
 
           {successMessage && (
-            <div className="p-3 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-200 dark:border-green-900" role="status">
+            <div
+              className="p-3 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-200 dark:border-green-900"
+              role="status"
+            >
               {successMessage}
             </div>
           )}
@@ -152,10 +153,7 @@ export function LoginForm() {
           </div>
 
           <div className="flex items-center justify-between pt-2">
-            <a
-              href="/forgot-password"
-              className="text-sm text-primary hover:underline"
-            >
+            <a href="/forgot-password" className="text-sm text-primary hover:underline">
               Forgot password? (This feature is not yet available)
             </a>
           </div>
@@ -165,7 +163,7 @@ export function LoginForm() {
           </Button>
 
           <div className="text-center text-sm text-muted-foreground pt-2">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a href="/signup" className="text-primary hover:underline">
               Sign up
             </a>

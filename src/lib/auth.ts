@@ -4,7 +4,10 @@ import type { SupabaseClient } from "../db/supabase.client";
  * Authentication error types
  */
 export class AuthenticationError extends Error {
-  constructor(message: string, public statusCode: number = 401) {
+  constructor(
+    message: string,
+    public statusCode = 401
+  ) {
     super(message);
     this.name = "AuthenticationError";
   }
@@ -25,10 +28,7 @@ export interface AuthenticatedUser {
  * @returns Promise<AuthenticatedUser> - Authenticated user information
  * @throws AuthenticationError - When authentication fails
  */
-export async function getAuthenticatedUser(
-  request: Request,
-  supabase: SupabaseClient
-): Promise<AuthenticatedUser> {
+export async function getAuthenticatedUser(request: Request, supabase: SupabaseClient): Promise<AuthenticatedUser> {
   // Extract Authorization header
   const authHeader = request.headers.get("Authorization");
   if (!authHeader) {
@@ -48,7 +48,10 @@ export async function getAuthenticatedUser(
 
   try {
     // Set the session with the JWT token
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
 
     if (error) {
       console.error("Supabase auth error:", error);
@@ -82,9 +85,9 @@ export async function getAuthenticatedUser(
  */
 export function createAuthErrorResponse(error: AuthenticationError): Response {
   return new Response(
-    JSON.stringify({ 
+    JSON.stringify({
       error: error.message,
-      ...(error.statusCode >= 500 ? { details: "Please try again later" } : {})
+      ...(error.statusCode >= 500 ? { details: "Please try again later" } : {}),
     }),
     {
       status: error.statusCode,

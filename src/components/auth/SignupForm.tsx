@@ -44,12 +44,10 @@ export function SignupForm() {
 
       if (response.ok) {
         const data = await response.json();
-        
+
         // Check if email confirmation is required (status 202)
         if (response.status === 202 || data.requiresConfirmation) {
-          setSuccessMessage(
-            "Registration successful!"
-          );
+          setSuccessMessage("Registration successful!");
           // Clear form after successful registration
           setFormData({ email: "", password: "", confirmPassword: "" });
         } else {
@@ -58,7 +56,7 @@ export function SignupForm() {
         }
       } else {
         const data = await response.json();
-        
+
         if (response.status === 409) {
           setServerError("Email is already in use.");
         } else {
@@ -80,17 +78,12 @@ export function SignupForm() {
     }
   };
 
-  const updateField = <K extends keyof SignupFormValues>(
-    field: K,
-    value: SignupFormValues[K]
-  ) => {
+  const updateField = <K extends keyof SignupFormValues>(field: K, value: SignupFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (validationErrors[field]) {
-      setValidationErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [field]: _, ...rest } = validationErrors;
+      setValidationErrors(rest);
     }
     if (serverError) {
       setServerError("");
@@ -106,13 +99,19 @@ export function SignupForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {serverError && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-200 dark:border-red-900" role="alert">
+            <div
+              className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-200 dark:border-red-900"
+              role="alert"
+            >
               {serverError}
             </div>
           )}
 
           {successMessage && (
-            <div className="p-3 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-200 dark:border-green-900" role="status">
+            <div
+              className="p-3 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-200 dark:border-green-900"
+              role="status"
+            >
               {successMessage}
             </div>
           )}
@@ -157,9 +156,7 @@ export function SignupForm() {
                 {validationErrors.password}
               </p>
             )}
-            <p className="text-xs text-muted-foreground">
-              Minimum 8 characters, including a letter and a number
-            </p>
+            <p className="text-xs text-muted-foreground">Minimum 8 characters, including a letter and a number</p>
           </div>
 
           <div className="space-y-2">

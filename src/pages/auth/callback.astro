@@ -23,12 +23,12 @@ if (error) {
 // Exchange the code for a session
 if (code) {
   const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-  
+
   if (exchangeError) {
     console.error("Code exchange error:", exchangeError);
     return Astro.redirect(`/login?error=${encodeURIComponent("Nie udało się potwierdzić konta.")}`);
   }
-  
+
   // Successfully confirmed - redirect to login with success message
   return Astro.redirect("/login?confirmed=true");
 }

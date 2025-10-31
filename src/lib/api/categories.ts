@@ -35,13 +35,10 @@ async function handleResponse<T>(res: Response): Promise<T> {
  * Fetch list of categories
  */
 export async function fetchCategories(): Promise<CategoryOption[]> {
-  const res = await fetch(
-    `${BASE_URL}/categories?select=id,name&order=name.asc`,
-    {
-      method: "GET",
-      credentials: "include",
-    }
-  );
+  const res = await fetch(`${BASE_URL}/categories?select=id,name&order=name.asc`, {
+    method: "GET",
+    credentials: "include",
+  });
 
   const response = await handleResponse<CategoryListResponse>(res);
   return response.data;

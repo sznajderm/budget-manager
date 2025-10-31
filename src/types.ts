@@ -1,218 +1,214 @@
-import type { Tables, TablesInsert, TablesUpdate, Enums } from './db/database.types'
+import type { Tables, TablesInsert, TablesUpdate, Enums } from "./db/database.types";
 
 /**
  * Common pagination metadata returned in list endpoints.
  */
 export interface PaginationMeta {
-  total_count: number
-  limit: number
-  offset: number
+  total_count: number;
+  limit: number;
+  offset: number;
 }
 
 /** Account DTOs & Commands */
-export type AccountType = Enums<'account_type_enum'>
+export type AccountType = Enums<"account_type_enum">;
 
 export type AccountDTO = Omit<
-  Tables<'accounts'>,
-  /* omit internal columns not exposed via API */ 'user_id' | 'deleted_at'
->
+  Tables<"accounts">,
+  /* omit internal columns not exposed via API */ "user_id" | "deleted_at"
+>;
 
-export type AccountCreateCommand = Pick<
-  TablesInsert<'accounts'>,
-  'name' | 'account_type'
->
+export type AccountCreateCommand = Pick<TablesInsert<"accounts">, "name" | "account_type">;
 
-export type AccountUpdateCommand = Partial<
-  Pick<TablesUpdate<'accounts'>, 'name'>
->
+export type AccountUpdateCommand = Partial<Pick<TablesUpdate<"accounts">, "name">>;
 
 /** Response type for account list endpoint */
 export interface AccountListResponse {
-  data: AccountDTO[]
-  meta: PaginationMeta
+  data: AccountDTO[];
+  meta: PaginationMeta;
 }
 
 /** Category DTOs & Commands */
-export type CategoryDTO = Omit<Tables<'categories'>, 'user_id'>
+export type CategoryDTO = Omit<Tables<"categories">, "user_id">;
 
-export type CategoryCreateCommand = Pick<TablesInsert<'categories'>, 'name'>
+export type CategoryCreateCommand = Pick<TablesInsert<"categories">, "name">;
 
-export type CategoryUpdateCommand = Partial<
-  Pick<TablesUpdate<'categories'>, 'name'>
->
+export type CategoryUpdateCommand = Partial<Pick<TablesUpdate<"categories">, "name">>;
 
 export interface DeleteCategoryCommand {
-  category_id: string
+  category_id: string;
 }
 
 export interface BulkReassignCategoryCommand {
-  from_category_id: string
-  to_category_id: string
+  from_category_id: string;
+  to_category_id: string;
 }
 
 /** Response type for category list endpoint */
 export interface CategoryListResponse {
-  data: CategoryDTO[]
-  meta: PaginationMeta
+  data: CategoryDTO[];
+  meta: PaginationMeta;
 }
 
 /** Transaction DTOs & Commands */
-export type TransactionType = Enums<'transaction_type_enum'>
+export type TransactionType = Enums<"transaction_type_enum">;
 
 // Helper refs to embed related names
-export type AccountNameRef = Pick<Tables<'accounts'>, 'name'>
-export type CategoryNameRef = Pick<Tables<'categories'>, 'name'>
+export type AccountNameRef = Pick<Tables<"accounts">, "name">;
+export type CategoryNameRef = Pick<Tables<"categories">, "name">;
 
-export type TransactionDTO = Omit<Tables<'transactions'>, 'user_id'> & {
+export type TransactionDTO = Omit<Tables<"transactions">, "user_id"> & {
   /** Embedded related account */
-  accounts: AccountNameRef
+  accounts: AccountNameRef;
   /** Embedded related category (can be null when category deleted) */
-  categories: CategoryNameRef | null
-}
+  categories: CategoryNameRef | null;
+};
 
 export type TransactionCreateCommand = Pick<
-  TablesInsert<'transactions'>,
-  'amount_cents' | 'transaction_type' | 'description' | 'transaction_date' | 'account_id' | 'category_id'
->
+  TablesInsert<"transactions">,
+  "amount_cents" | "transaction_type" | "description" | "transaction_date" | "account_id" | "category_id"
+>;
 
 export type TransactionUpdateCommand = Partial<
-  Pick<TablesUpdate<'transactions'>, 'amount_cents' | 'description' | 'category_id' | 'transaction_type' | 'transaction_date' | 'account_id'>
->
+  Pick<
+    TablesUpdate<"transactions">,
+    "amount_cents" | "description" | "category_id" | "transaction_type" | "transaction_date" | "account_id"
+  >
+>;
 
 export interface DeleteTransactionCommand {
-  transaction_id: string
+  transaction_id: string;
 }
 
 /** Response type for transaction list endpoint */
 export interface TransactionListResponse {
-  data: TransactionDTO[]
-  meta: PaginationMeta
+  data: TransactionDTO[];
+  meta: PaginationMeta;
 }
 
 /** AI Suggestion DTOs & Commands */
 export interface AISuggestionDTO {
-  id: string
-  transaction_id: string
-  suggested_category_id: string
-  confidence_score: number
-  approved: boolean | null
-  created_at: string
+  id: string;
+  transaction_id: string;
+  suggested_category_id: string;
+  confidence_score: number;
+  approved: boolean | null;
+  created_at: string;
   /** Embedded category name for convenience */
-  categories: CategoryNameRef
+  categories: CategoryNameRef;
 }
 
 export interface RequestAISuggestionCommand {
-  transaction_id: string
+  transaction_id: string;
 }
 
 export interface HandleAISuggestionCommand {
-  suggestion_id: string
-  approved: boolean
+  suggestion_id: string;
+  approved: boolean;
 }
 
 /** Dashboard summaries */
 export interface SummaryCommand {
-  start_date: string // ISO timestamp
-  end_date: string // ISO timestamp
+  start_date: string; // ISO timestamp
+  end_date: string; // ISO timestamp
 }
 
 export interface SummaryDTO {
-  total_cents: number
-  transaction_count: number
-  period_start: string
-  period_end: string
+  total_cents: number;
+  transaction_count: number;
+  period_start: string;
+  period_end: string;
 }
 
 /** OpenRouter Service Types */
 
 /** Message role types */
-export type ChatMessageRole = 'system' | 'user' | 'assistant'
+export type ChatMessageRole = "system" | "user" | "assistant";
 
 /** Chat message structure */
 export interface ChatMessage {
-  role: ChatMessageRole
-  content: string
+  role: ChatMessageRole;
+  content: string;
 }
 
 /** JSON Schema definition for structured responses */
 export interface JsonSchema {
-  type: 'object'
-  properties: Record<string, unknown>
-  required?: string[]
-  additionalProperties?: boolean
+  type: "object";
+  properties: Record<string, unknown>;
+  required?: string[];
+  additionalProperties?: boolean;
 }
 
 /** Response format configuration for structured outputs */
 export interface ResponseFormat {
-  type: 'json_schema'
+  type: "json_schema";
   json_schema: {
-    name: string
-    strict: true
-    schema: JsonSchema
-  }
+    name: string;
+    strict: true;
+    schema: JsonSchema;
+  };
 }
 
 /** Chat completion request configuration */
 export interface ChatCompletionRequest {
-  messages: ChatMessage[]
-  model?: string
-  response_format?: ResponseFormat
-  temperature?: number
-  max_tokens?: number
-  top_p?: number
-  frequency_penalty?: number
-  presence_penalty?: number
+  messages: ChatMessage[];
+  model?: string;
+  response_format?: ResponseFormat;
+  temperature?: number;
+  max_tokens?: number;
+  top_p?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
 }
 
 /** Chat completion response from API */
 export interface ChatCompletionResponse {
-  id: string
-  model: string
-  created: number
-  choices: Array<{
-    index: number
-    message: ChatMessage
-    finish_reason: string
-  }>
+  id: string;
+  model: string;
+  created: number;
+  choices: {
+    index: number;
+    message: ChatMessage;
+    finish_reason: string;
+  }[];
   usage: {
-    prompt_tokens: number
-    completion_tokens: number
-    total_tokens: number
-  }
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 
 /** Streaming response chunk (for future use) */
 export interface ChatCompletionChunk {
-  id: string
-  model: string
-  created: number
-  choices: Array<{
-    index: number
+  id: string;
+  model: string;
+  created: number;
+  choices: {
+    index: number;
     delta: {
-      role?: ChatMessageRole
-      content?: string
-    }
-    finish_reason: string | null
-  }>
+      role?: ChatMessageRole;
+      content?: string;
+    };
+    finish_reason: string | null;
+  }[];
 }
 
 /** OpenRouter service configuration */
 export interface OpenRouterConfig {
-  apiKey: string
-  baseUrl?: string
-  defaultModel?: string
-  timeout?: number
-  maxRetries?: number
+  apiKey: string;
+  baseUrl?: string;
+  defaultModel?: string;
+  timeout?: number;
+  maxRetries?: number;
 }
 
 /** Model information (for getAvailableModels) */
 export interface ModelInfo {
-  id: string
-  name: string
-  description?: string
-  context_length?: number
+  id: string;
+  name: string;
+  description?: string;
+  context_length?: number;
   pricing?: {
-    prompt: number
-    completion: number
-  }
+    prompt: number;
+    completion: number;
+  };
 }

@@ -3,13 +3,14 @@ import type { SupabaseClient } from "../../db/supabase.client";
 import type { SummaryDTO } from "../../types";
 
 // Reuse validation schema from expense-summary service for consistency
-export const SummaryCommandSchema = z.object({
-  start_date: z.string().datetime("Invalid ISO 8601 timestamp format"),
-  end_date: z.string().datetime("Invalid ISO 8601 timestamp format")
-}).refine(
-  (data) => new Date(data.start_date) <= new Date(data.end_date),
-  { message: "Start date must be before or equal to end date" }
-);
+export const SummaryCommandSchema = z
+  .object({
+    start_date: z.string().datetime("Invalid ISO 8601 timestamp format"),
+    end_date: z.string().datetime("Invalid ISO 8601 timestamp format"),
+  })
+  .refine((data) => new Date(data.start_date) <= new Date(data.end_date), {
+    message: "Start date must be before or equal to end date",
+  });
 
 export type ValidatedSummaryCommand = z.infer<typeof SummaryCommandSchema>;
 
@@ -54,7 +55,7 @@ export async function getIncomeSummary(
       total_cents,
       transaction_count,
       period_start: validatedData.start_date,
-      period_end: validatedData.end_date
+      period_end: validatedData.end_date,
     };
 
     return summary;

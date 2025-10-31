@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 interface CleanupResult {
   deletedUsers: number; // kept for backward compatibility with existing callers
@@ -15,9 +15,7 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error(
-      'Missing required environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY'
-    );
+    throw new Error("Missing required environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
   }
 
   // Create admin client with service role key
@@ -30,9 +28,7 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
 
   const TARGET_USER_ID = process.env.E2E_USERNAME_ID;
   if (!TARGET_USER_ID) {
-    throw new Error(
-      'Missing required environment variable: E2E_USERNAME_ID'
-    );
+    throw new Error("Missing required environment variable: E2E_USERNAME_ID");
   }
 
   const result: CleanupResult = {
@@ -43,9 +39,9 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
   try {
     // 1) Find all transactions for the target user
     const { data: transactions, error: listTxError } = await supabase
-      .from('transactions')
-      .select('id')
-      .eq('user_id', TARGET_USER_ID);
+      .from("transactions")
+      .select("id")
+      .eq("user_id", TARGET_USER_ID);
 
     if (listTxError) {
       result.errors.push(`Failed to list transactions: ${listTxError.message}`);
@@ -60,9 +56,9 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
 
     // 2) Delete dependent AI suggestions referencing these transactions (if any)
     const { error: delSuggestErr } = await supabase
-      .from('ai_suggestions')
+      .from("ai_suggestions")
       .delete()
-      .in('transaction_id', transactionIds);
+      .in("transaction_id", transactionIds);
 
     if (delSuggestErr) {
       result.errors.push(`Failed to delete ai_suggestions: ${delSuggestErr.message}`);
@@ -71,10 +67,10 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
 
     // 3) Delete transactions for the target user and count how many were deleted
     const { count, error: delTxError } = await supabase
-      .from('transactions')
-      .delete({ count: 'exact' })
-      .in('id', transactionIds)
-      .select('id');
+      .from("transactions")
+      .delete({ count: "exact" })
+      .in("id", transactionIds)
+      .select("id");
 
     if (delTxError) {
       result.errors.push(`Failed to delete transactions: ${delTxError.message}`);
@@ -84,9 +80,7 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
     result.deletedUsers = count ?? 0;
     console.log(`✓ Deleted ${result.deletedUsers} transaction(s) for user ${TARGET_USER_ID}`);
   } catch (error) {
-    result.errors.push(
-      `Cleanup failed: ${error instanceof Error ? error.message : String(error)}`
-    );
+    result.errors.push(`Cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   return result;
@@ -97,16 +91,16 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
  * Useful for manual cleanup scripts.
  */
 export async function runCleanup() {
-  console.log('Starting transactions cleanup for target user...');
+  console.log("Starting transactions cleanup for target user...");
   const result = await cleanupTestUsers();
-  
+
   console.log(`\nCleanup complete:`);
   console.log(`- Deleted transactions: ${result.deletedUsers}`);
-  
+
   if (result.errors.length > 0) {
     console.error(`\nErrors encountered:`);
     result.errors.forEach((error) => console.error(`  - ${error}`));
   }
-  
+
   return result;
 }

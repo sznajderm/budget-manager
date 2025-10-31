@@ -7,10 +7,7 @@ import { formatCentsAsUSD, getAmountClassName } from "@/lib/utils/currency";
  * @param uncategorizedLabel - Label to use for null category (default: "Uncategorized")
  * @returns TransactionVM for rendering
  */
-export function mapTransactionToVM(
-  dto: TransactionDTO,
-  uncategorizedLabel = "Uncategorized"
-): TransactionVM {
+export function mapTransactionToVM(dto: TransactionDTO, uncategorizedLabel = "Uncategorized"): TransactionVM {
   return {
     id: dto.id,
     createdAtISO: dto.created_at,
@@ -33,9 +30,6 @@ export function mapTransactionToVM(
  * @param uncategorizedLabel - Label to use for null category
  * @returns Array of TransactionVMs
  */
-export function mapTransactionsToVMs(
-  dtos: TransactionDTO[],
-  uncategorizedLabel = "Uncategorized"
-): TransactionVM[] {
+export function mapTransactionsToVMs(dtos: TransactionDTO[], uncategorizedLabel = "Uncategorized"): TransactionVM[] {
   return dtos.map((dto) => mapTransactionToVM(dto, uncategorizedLabel));
 }

@@ -1,9 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { 
-  getIncomeSummary,
-  SummaryCommandSchema
-} from "../../../../../lib/services/income-summary.service";
+import { getIncomeSummary, SummaryCommandSchema } from "../../../../../lib/services/income-summary.service";
 
 export const prerender = false;
 
@@ -11,7 +8,7 @@ export const POST: APIRoute = async (context) => {
   try {
     // Get Supabase client from context (set by middleware)
     const supabase = context.locals.supabase;
-    
+
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Supabase client not available" }), {
         status: 500,
@@ -21,7 +18,7 @@ export const POST: APIRoute = async (context) => {
 
     // Get authenticated user from context (set by middleware)
     const user = context.locals.user;
-    
+
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -104,7 +101,7 @@ export const POST: APIRoute = async (context) => {
         userId: user.id,
         summaryData: {
           start_date: validatedData.start_date,
-          end_date: validatedData.end_date
+          end_date: validatedData.end_date,
         },
         error: error instanceof Error ? error.message : "Unknown error",
       });
@@ -119,10 +116,7 @@ export const POST: APIRoute = async (context) => {
         }
 
         // Database-related errors
-        if (
-          error.message.includes("Failed to retrieve income summary") ||
-          error.message.includes("database error")
-        ) {
+        if (error.message.includes("Failed to retrieve income summary") || error.message.includes("database error")) {
           return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
             status: 500,
             headers: { "Content-Type": "application/json" },

@@ -1,14 +1,14 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { 
-  createTransaction, 
+import {
+  createTransaction,
   TransactionCreateSchema,
   listTransactions,
   TransactionListQuerySchema,
   updateTransaction,
   TransactionUpdateSchema,
   TransactionIdSchema,
-  deleteTransaction
+  deleteTransaction,
 } from "../../../../../lib/services/transaction.service";
 import type { TransactionListResponse } from "../../../../../types";
 import { parseTransactionIdFromQuery } from "../../../../../lib/utils/postgrest-parser";
@@ -19,7 +19,7 @@ export const POST: APIRoute = async (context) => {
   try {
     // Get Supabase client from context (set by middleware)
     const supabase = context.locals.supabase;
-    
+
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Supabase client not available" }), {
         status: 500,
@@ -29,7 +29,7 @@ export const POST: APIRoute = async (context) => {
 
     // Get authenticated user from context (set by middleware)
     const user = context.locals.user;
-    
+
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -60,19 +60,19 @@ export const POST: APIRoute = async (context) => {
     const bodyObj = requestBody as Record<string, unknown>;
     const missingFields: string[] = [];
 
-    if (!(("amount_cents" in bodyObj) && bodyObj.amount_cents !== undefined)) {
+    if (!("amount_cents" in bodyObj && bodyObj.amount_cents !== undefined)) {
       missingFields.push("amount_cents");
     }
-    if (!(("transaction_type" in bodyObj) && bodyObj.transaction_type !== undefined)) {
+    if (!("transaction_type" in bodyObj && bodyObj.transaction_type !== undefined)) {
       missingFields.push("transaction_type");
     }
-    if (!(("description" in bodyObj) && bodyObj.description !== undefined)) {
+    if (!("description" in bodyObj && bodyObj.description !== undefined)) {
       missingFields.push("description");
     }
-    if (!(("transaction_date" in bodyObj) && bodyObj.transaction_date !== undefined)) {
+    if (!("transaction_date" in bodyObj && bodyObj.transaction_date !== undefined)) {
       missingFields.push("transaction_date");
     }
-    if (!(("account_id" in bodyObj) && bodyObj.account_id !== undefined)) {
+    if (!("account_id" in bodyObj && bodyObj.account_id !== undefined)) {
       missingFields.push("account_id");
     }
 
@@ -124,7 +124,7 @@ export const POST: APIRoute = async (context) => {
           transaction_type: validatedData.transaction_type,
           description: validatedData.description,
           account_id: validatedData.account_id,
-          category_id: validatedData.category_id
+          category_id: validatedData.category_id,
         },
         error: error instanceof Error ? error.message : "Unknown error",
       });
@@ -176,7 +176,7 @@ export const GET: APIRoute = async (context) => {
   try {
     // Get Supabase client from context (set by middleware)
     const supabase = context.locals.supabase;
-    
+
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Supabase client not available" }), {
         status: 500,
@@ -186,7 +186,7 @@ export const GET: APIRoute = async (context) => {
 
     // Get authenticated user from context (set by middleware)
     const user = context.locals.user;
-    
+
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -195,12 +195,12 @@ export const GET: APIRoute = async (context) => {
     }
 
     const userId = user.id;
-    
+
     // Parse and validate query parameters
     const url = new URL(context.request.url);
     const rawParams = {
-      limit: url.searchParams.get('limit') || undefined,
-      offset: url.searchParams.get('offset') || undefined
+      limit: url.searchParams.get("limit") || undefined,
+      offset: url.searchParams.get("offset") || undefined,
     };
 
     // Validate query parameters using Zod schema
@@ -209,7 +209,7 @@ export const GET: APIRoute = async (context) => {
       validatedParams = TransactionListQuerySchema.parse(rawParams);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errorMessages = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(", ");
+        const errorMessages = error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
         return new Response(JSON.stringify({ error: `Invalid query parameters: ${errorMessages}` }), {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -232,8 +232,8 @@ export const GET: APIRoute = async (context) => {
         meta: {
           total_count: result.total_count,
           limit: validatedParams.limit,
-          offset: validatedParams.offset
-        }
+          offset: validatedParams.offset,
+        },
       };
 
       return new Response(JSON.stringify(response), {
@@ -257,10 +257,7 @@ export const GET: APIRoute = async (context) => {
         }
 
         // Database-related errors
-        if (
-          error.message.includes("Failed to retrieve") ||
-          error.message.includes("database error")
-        ) {
+        if (error.message.includes("Failed to retrieve") || error.message.includes("database error")) {
           return new Response(JSON.stringify({ error: "Failed to retrieve transactions" }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
@@ -288,7 +285,7 @@ export const PATCH: APIRoute = async (context) => {
   try {
     // Get Supabase client from context (set by middleware)
     const supabase = context.locals.supabase;
-    
+
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Supabase client not available" }), {
         status: 500,
@@ -298,7 +295,7 @@ export const PATCH: APIRoute = async (context) => {
 
     // Get authenticated user from context (set by middleware)
     const user = context.locals.user;
-    
+
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -312,12 +309,15 @@ export const PATCH: APIRoute = async (context) => {
     const transactionId = parseTransactionIdFromQuery(queryParams);
 
     if (!transactionId) {
-      return new Response(JSON.stringify({ 
-        error: "Transaction ID is required in format: ?id=eq.{transaction_id}" 
-      }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Transaction ID is required in format: ?id=eq.{transaction_id}",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Validate transaction ID format
@@ -325,12 +325,15 @@ export const PATCH: APIRoute = async (context) => {
       TransactionIdSchema.parse(transactionId);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return new Response(JSON.stringify({ 
-          error: "Invalid transaction ID format: must be a valid UUID" 
-        }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            error: "Invalid transaction ID format: must be a valid UUID",
+          }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
       }
     }
 
@@ -391,10 +394,7 @@ export const PATCH: APIRoute = async (context) => {
 
       if (error instanceof Error) {
         // Check if it's a not found error
-        if (
-          error.message.includes("Transaction not found") ||
-          error.message.includes("does not belong to user")
-        ) {
+        if (error.message.includes("Transaction not found") || error.message.includes("does not belong to user")) {
           return new Response(JSON.stringify({ error: error.message }), {
             status: 404,
             headers: { "Content-Type": "application/json" },
@@ -446,7 +446,7 @@ export const DELETE: APIRoute = async (context) => {
   try {
     // Get Supabase client from context (set by middleware)
     const supabase = context.locals.supabase;
-    
+
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Supabase client not available" }), {
         status: 500,
@@ -456,7 +456,7 @@ export const DELETE: APIRoute = async (context) => {
 
     // Get authenticated user from context (set by middleware)
     const user = context.locals.user;
-    
+
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -470,12 +470,15 @@ export const DELETE: APIRoute = async (context) => {
     const transactionId = parseTransactionIdFromQuery(queryParams);
 
     if (!transactionId) {
-      return new Response(JSON.stringify({ 
-        error: "Transaction ID is required in format: ?id=eq.{transaction_id}" 
-      }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Transaction ID is required in format: ?id=eq.{transaction_id}",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Validate transaction ID format
@@ -483,12 +486,15 @@ export const DELETE: APIRoute = async (context) => {
       TransactionIdSchema.parse(transactionId);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return new Response(JSON.stringify({ 
-          error: "Invalid transaction ID format: must be a valid UUID" 
-        }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            error: "Invalid transaction ID format: must be a valid UUID",
+          }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
       }
     }
 
@@ -510,10 +516,7 @@ export const DELETE: APIRoute = async (context) => {
 
       if (error instanceof Error) {
         // Check if it's a not found error
-        if (
-          error.message.includes("Transaction not found") ||
-          error.message.includes("does not belong to user")
-        ) {
+        if (error.message.includes("Transaction not found") || error.message.includes("does not belong to user")) {
           return new Response(JSON.stringify({ error: error.message }), {
             status: 404,
             headers: { "Content-Type": "application/json" },
@@ -529,9 +532,7 @@ export const DELETE: APIRoute = async (context) => {
         }
 
         // Database errors
-        if (
-          error.message.includes("Failed to delete transaction due to database error")
-        ) {
+        if (error.message.includes("Failed to delete transaction due to database error")) {
           return new Response(JSON.stringify({ error: "Failed to delete transaction" }), {
             status: 500,
             headers: { "Content-Type": "application/json" },

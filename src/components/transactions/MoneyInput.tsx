@@ -9,13 +9,7 @@ interface MoneyInputProps {
   disabled?: boolean;
 }
 
-export function MoneyInput({
-  id,
-  value,
-  onChange,
-  error,
-  disabled,
-}: MoneyInputProps) {
+export function MoneyInput({ id, value, onChange, error, disabled }: MoneyInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     // Allow empty, digits, and one decimal point
@@ -30,9 +24,7 @@ export function MoneyInput({
         Amount (USD) <span className="text-red-500">*</span>
       </Label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-          $
-        </span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
         <Input
           id={id}
           type="text"

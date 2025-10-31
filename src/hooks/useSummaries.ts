@@ -28,7 +28,10 @@ export function useSummaries(range: DateRange | null) {
 
   const expense = useQuery({
     queryKey: ["summary", "expense", cmd?.start_date, cmd?.end_date],
-    queryFn: () => fetchExpenseSummary(cmd!),
+    queryFn: () => {
+      if (!cmd) throw new Error("Command is required");
+      return fetchExpenseSummary(cmd);
+    },
     enabled,
     staleTime: 30_000,
     select: (dto: SummaryDTO) => dtoToVM("expense", dto),
@@ -36,7 +39,10 @@ export function useSummaries(range: DateRange | null) {
 
   const income = useQuery({
     queryKey: ["summary", "income", cmd?.start_date, cmd?.end_date],
-    queryFn: () => fetchIncomeSummary(cmd!),
+    queryFn: () => {
+      if (!cmd) throw new Error("Command is required");
+      return fetchIncomeSummary(cmd);
+    },
     enabled,
     staleTime: 30_000,
     select: (dto: SummaryDTO) => dtoToVM("income", dto),

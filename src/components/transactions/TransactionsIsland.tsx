@@ -62,10 +62,8 @@ export function TransactionsIsland() {
     error: transactionsError,
   } = useTransactionsQuery(pageSize, offset);
 
-  const { data: accounts = [], isLoading: accountsLoading } =
-    useAccountsQuery();
-  const { data: categories = [], isLoading: categoriesLoading } =
-    useCategoriesQuery();
+  const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategoriesQuery();
 
   // Mutations
   const createMutation = useCreateTransactionMutation();
@@ -74,9 +72,7 @@ export function TransactionsIsland() {
 
   // Transform data to ViewModels
   const transactions =
-    transactionsData && Array.isArray(transactionsData.data)
-      ? mapTransactionsToVMs(transactionsData.data)
-      : [];
+    transactionsData && Array.isArray(transactionsData.data) ? mapTransactionsToVMs(transactionsData.data) : [];
   const totalCount = transactionsData?.meta.total_count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -114,28 +110,24 @@ export function TransactionsIsland() {
     setSelectedTx(null);
   };
 
-  const handleCreate = async (payload: any) => {
+  const handleCreate = async (payload: Record<string, unknown>) => {
     try {
       await createMutation.mutateAsync(payload);
       toast.success("Transaction created successfully");
       handleCloseModal();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create transaction"
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to create transaction");
       throw error;
     }
   };
 
-  const handleUpdate = async (id: string, payload: any) => {
+  const handleUpdate = async (id: string, payload: Record<string, unknown>) => {
     try {
       await updateMutation.mutateAsync({ id, payload });
       toast.success("Transaction updated successfully");
       handleCloseModal();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update transaction"
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to update transaction");
       throw error;
     }
   };
@@ -158,9 +150,7 @@ export function TransactionsIsland() {
       toast.success("Transaction deleted successfully");
       handleCloseDeleteDialog();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete transaction"
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to delete transaction");
       throw error;
     }
   };
@@ -195,8 +185,7 @@ export function TransactionsIsland() {
     };
   };
 
-  const formInitialValues =
-    modalMode === "edit" ? getInitialFormValues() : getDefaultFormValues();
+  const formInitialValues = modalMode === "edit" ? getInitialFormValues() : getDefaultFormValues();
 
   const uncategorizedId = Array.isArray(categories)
     ? categories.find((cat) => cat.name.toLowerCase() === "uncategorized")?.id
@@ -206,15 +195,12 @@ export function TransactionsIsland() {
   if (transactionsError) {
     return (
       <div className="container mx-auto py-8">
-        <div className="rounded-md bg-red-50 p-4 text-red-600">
-          Error loading transactions. Please try again.
-        </div>
+        <div className="rounded-md bg-red-50 p-4 text-red-600">Error loading transactions. Please try again.</div>
       </div>
     );
   }
 
-  const isLoading =
-    transactionsLoading || accountsLoading || categoriesLoading;
+  const isLoading = transactionsLoading || accountsLoading || categoriesLoading;
 
   return (
     <div className="container mx-auto py-8 space-y-6">

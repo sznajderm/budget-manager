@@ -1,5 +1,5 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../../db/database.types";
 
 export interface User {
   id: string;
@@ -7,9 +7,9 @@ export interface User {
 }
 
 export class AuthenticationError extends Error {
-  constructor(message: string = 'Unauthorized') {
+  constructor(message = "Unauthorized") {
     super(message);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }
 
@@ -18,12 +18,13 @@ export class AuthenticationError extends Error {
  * Supports both Bearer token (Authorization header) and cookie-based sessions.
  * Returns null if no valid session found.
  */
-export async function getUserFromRequest(
-  supabase: SupabaseClient<Database>
-): Promise<User | null> {
+export async function getUserFromRequest(supabase: SupabaseClient<Database>): Promise<User | null> {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
     if (error || !user) {
       return null;
     }
@@ -33,7 +34,7 @@ export async function getUserFromRequest(
       email: user.email,
     };
   } catch (error) {
-    console.error('Error getting user from request:', error);
+    console.error("Error getting user from request:", error);
     return null;
   }
 }
@@ -42,14 +43,12 @@ export async function getUserFromRequest(
  * Requires authenticated user or throws AuthenticationError.
  * Use this in API endpoints that must have an authenticated user.
  */
-export async function requireUser(
-  supabase: SupabaseClient<Database>
-): Promise<User> {
+export async function requireUser(supabase: SupabaseClient<Database>): Promise<User> {
   const user = await getUserFromRequest(supabase);
-  
+
   if (!user) {
-    throw new AuthenticationError('Unauthorized');
+    throw new AuthenticationError("Unauthorized");
   }
-  
+
   return user;
 }

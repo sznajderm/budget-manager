@@ -1,10 +1,10 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { 
-  createAccount, 
+import {
+  createAccount,
   AccountCreateSchema,
   listAccounts,
-  AccountListQuerySchema
+  AccountListQuerySchema,
 } from "../../../../../lib/services/account.service";
 import type { AccountListResponse } from "../../../../../types";
 
@@ -14,7 +14,7 @@ export const POST: APIRoute = async (context) => {
   try {
     // Get Supabase client from context (set by middleware)
     const supabase = context.locals.supabase;
-    
+
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Supabase client not available" }), {
         status: 500,
@@ -24,7 +24,7 @@ export const POST: APIRoute = async (context) => {
 
     // Get authenticated user from context (set by middleware)
     const user = context.locals.user;
-    
+
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -154,7 +154,7 @@ export const GET: APIRoute = async (context) => {
   try {
     // Get Supabase client from context (set by middleware)
     const supabase = context.locals.supabase;
-    
+
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Supabase client not available" }), {
         status: 500,
@@ -164,7 +164,7 @@ export const GET: APIRoute = async (context) => {
 
     // Get authenticated user from context (set by middleware)
     const user = context.locals.user;
-    
+
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -173,12 +173,12 @@ export const GET: APIRoute = async (context) => {
     }
 
     const userId = user.id;
-    
+
     // Parse and validate query parameters
     const url = new URL(context.request.url);
     const rawParams = {
-      limit: url.searchParams.get('limit') || undefined,
-      offset: url.searchParams.get('offset') || undefined
+      limit: url.searchParams.get("limit") || undefined,
+      offset: url.searchParams.get("offset") || undefined,
     };
 
     // Validate query parameters using Zod schema
@@ -187,13 +187,16 @@ export const GET: APIRoute = async (context) => {
       validatedParams = AccountListQuerySchema.parse(rawParams);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return new Response(JSON.stringify({ 
-          error: "Invalid query parameters",
-          details: error.errors
-        }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            error: "Invalid query parameters",
+            details: error.errors,
+          }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
       }
 
       return new Response(JSON.stringify({ error: "Invalid query parameters" }), {
@@ -227,10 +230,7 @@ export const GET: APIRoute = async (context) => {
         }
 
         // Database-related errors
-        if (
-          error.message.includes("Failed to retrieve") ||
-          error.message.includes("database error")
-        ) {
+        if (error.message.includes("Failed to retrieve") || error.message.includes("database error")) {
           return new Response(JSON.stringify({ error: "Failed to retrieve accounts" }), {
             status: 500,
             headers: { "Content-Type": "application/json" },

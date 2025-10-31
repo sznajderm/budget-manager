@@ -5,3 +5,11 @@ compatibility_flags = ["nodejs_compat"]
 
 [site]
 bucket = "dist"
+
+[[rules]]
+globs = ["**/*"]
+action = "serve"
+
+[[routes]]
+pattern = "/*"
+zone_name = "*"

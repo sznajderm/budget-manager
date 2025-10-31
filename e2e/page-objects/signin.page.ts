@@ -13,7 +13,7 @@ export class SigninPage {
     this.emailInput = page.locator('#email');
     this.passwordInput = page.locator('#password');
     // Support both Polish and English button labels
-    this.submitButton = page.getByRole('button', { name: /zaloguj się|log in/i });
+    this.submitButton = page.getByRole('button', { name: /zaloguj się|sign in/i });
     this.errorMessage = page.locator('[role="alert"]').first();
     this.signupLink = page.getByRole('link', { name: /zarejestruj się|sign up/i });
   }

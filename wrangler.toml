@@ -3,6 +3,9 @@ main = "dist/_worker.js"
 compatibility_date = "2025-10-31"
 compatibility_flags = ["nodejs_compat"]
 
+[site]
+bucket = "./dist"
+
 # KV namespace for sessions
 [[kv_namespaces]]
 binding = "SESSION"

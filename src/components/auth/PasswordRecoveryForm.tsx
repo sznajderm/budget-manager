@@ -39,13 +39,13 @@ export function PasswordRecoveryForm() {
       });
 
       if (response.ok) {
-        setSuccessMessage(
-          "Wysłaliśmy instrukcje resetu hasła na podany adres email. Sprawdź swoją skrzynkę pocztową."
+      setSuccessMessage(
+          "We've sent password reset instructions to your email. Please check your inbox."
         );
         setFormData({ email: "", redirectTo: "/auth/callback" });
       } else {
         const data = await response.json();
-        setServerError(data.error || "Wystąpił błąd. Spróbuj ponownie.");
+        setServerError(data.error || "An error occurred. Please try again.");
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -85,9 +85,9 @@ export function PasswordRecoveryForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Odzyskiwanie hasła</CardTitle>
+        <CardTitle>Password Recovery</CardTitle>
         <CardDescription>
-          Wprowadź swój adres email, aby otrzymać instrukcje resetu hasła
+          Enter your email address to receive password reset instructions
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -115,7 +115,7 @@ export function PasswordRecoveryForm() {
               onChange={(e) => updateField("email", e.target.value)}
               disabled={submitting}
               aria-invalid={!!validationErrors.email}
-              placeholder="twoj@email.com"
+              placeholder="your@email.com"
             />
             {validationErrors.email && (
               <p className="text-sm text-red-600" role="alert">
@@ -125,13 +125,13 @@ export function PasswordRecoveryForm() {
           </div>
 
           <Button type="submit" disabled={submitting} className="w-full">
-            {submitting ? "Wysyłanie..." : "Wyślij instrukcje"}
+            {submitting ? "Sending..." : "Send Instructions"}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground pt-2">
-            Pamiętasz hasło?{" "}
+            Remember your password?{" "}
             <a href="/login" className="text-primary hover:underline">
-              Zaloguj się
+              Sign in
             </a>
           </div>
         </form>

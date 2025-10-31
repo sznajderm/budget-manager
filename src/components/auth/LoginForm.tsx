@@ -27,7 +27,7 @@ export function LoginForm() {
     // Check for success message in URL params
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get("confirmed") === "true" ? "Konto potwierdzone! Możesz się teraz zalogować." : "";
+      return urlParams.get("confirmed") === "true" ? "Account confirmed! You can now log in." : "";
     }
     return "";
   });
@@ -55,7 +55,7 @@ export function LoginForm() {
         window.location.assign("/dashboard");
       } else {
         const data = await response.json();
-        setServerError(data.error || "Nieprawidłowe dane logowania.");
+        setServerError(data.error || "Invalid login credentials.");
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -92,8 +92,8 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Logowanie</CardTitle>
-        <CardDescription>Wprowadź swoje dane, aby się zalogować</CardDescription>
+        <CardTitle>Login</CardTitle>
+        <CardDescription>Enter your credentials to sign in</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,7 +120,7 @@ export function LoginForm() {
               onChange={(e) => updateField("email", e.target.value)}
               disabled={submitting}
               aria-invalid={!!validationErrors.email}
-              placeholder="twoj@email.com"
+              placeholder="your@email.com"
             />
             {validationErrors.email && (
               <p className="text-sm text-red-600" role="alert">
@@ -131,7 +131,7 @@ export function LoginForm() {
 
           <div className="space-y-2">
             <Label htmlFor="password">
-              Hasło <span className="text-red-500">*</span>
+              Password <span className="text-red-500">*</span>
             </Label>
             <Input
               id="password"
@@ -154,18 +154,18 @@ export function LoginForm() {
               href="/forgot-password"
               className="text-sm text-primary hover:underline"
             >
-              Zapomniałeś hasła? (Ta funkcjonalność nie działa)
+              Forgot password? (This feature is not yet available)
             </a>
           </div>
 
           <Button type="submit" disabled={submitting} className="w-full">
-            {submitting ? "Logowanie..." : "Zaloguj się"}
+            {submitting ? "Signing in..." : "Sign in"}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground pt-2">
-            Nie masz konta?{" "}
+            Don't have an account?{" "}
             <a href="/signup" className="text-primary hover:underline">
-              Zarejestruj się
+              Sign up
             </a>
           </div>
         </form>

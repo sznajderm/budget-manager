@@ -26,6 +26,6 @@ export default defineConfig({
     },
   },
   adapter: cloudflare({
-    mode: "directory",
+    mode: "advanced",
   }),
 });

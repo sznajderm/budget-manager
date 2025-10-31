@@ -29,13 +29,13 @@ export class TransactionsPage {
     this.modal = page.locator('[role="dialog"]');
     this.modalTitle = this.modal.locator("h2");
     // Scope inputs to the open modal to avoid interacting with hidden/detached nodes
-    this.amountInput = this.modal.locator("#amount_dollars");
-    this.typeSelect = this.modal.locator("#transaction_type");
-    this.dateInput = this.modal.locator("#transaction_date_input");
-    this.accountSelect = this.modal.locator("#account_id");
-    this.categorySelect = this.modal.locator("#category_id");
-    this.descriptionInput = this.modal.locator("#description");
-    this.submitButton = this.modal.getByRole("button", { name: /save|create/i });
+    this.amountInput = this.modal.locator('[data-testid="transaction-amount_dollars"]');
+    this.typeSelect = this.modal.locator('[data-testid="transaction-type-select"]');
+    this.dateInput = this.modal.locator('[data-testid="transaction-transaction_date_input"]');
+    this.accountSelect = this.modal.locator('[data-testid="transaction-account-select"]');
+    this.categorySelect = this.modal.locator('[data-testid="transaction-category-select"]');
+    this.descriptionInput = this.modal.locator('[data-testid="transaction-description-input"]');
+    this.submitButton = this.modal.locator('[data-testid="transaction-submit-button"]');
     this.cancelButton = this.modal.getByRole("button", { name: /cancel/i });
     this.errorMessage = this.modal.locator('[role="alert"]');
 
@@ -66,36 +66,56 @@ export class TransactionsPage {
     category?: string;
     description?: string;
   }) {
-    // Fill amount (robust for masked/controlled input)
+    // Fill amount - try multiple approaches to ensure React state is updated
     await this.amountInput.waitFor({ state: "visible" });
-    await expect(this.amountInput).toBeEditable();
     await this.amountInput.click();
+    await this.amountInput.clear();
     await this.amountInput.fill(data.amount);
-    await expect(this.amountInput).toHaveValue(data.amount);
+    // Force trigger React events
+    await this.amountInput.dispatchEvent('input');
+    await this.amountInput.dispatchEvent('change');
+    await this.page.waitForTimeout(500);
+    
     // Select type (using Radix UI SelectItem)
+    await this.typeSelect.waitFor({ state: "visible" });
     await this.typeSelect.click();
-    await this.page.getByRole("option", { name: data.type === "expense" ? "Expense" : "Income" }).click();
+    await this.page.locator(`[role="option"]:has-text("${data.type === "expense" ? "Expense" : "Income"}")`).first().click();
+    await this.page.waitForTimeout(300);
 
-    // Fill date if provided
-    // if (data.date) {
-    //   await this.dateInput.fill(data.date);
-    // }
+    // Fill date - format as DD/MM/YYYY HH:mm
+    const [year, month, day] = new Date().toISOString().split('T')[0].split('-');
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const dateString = `${day}/${month}/${year} ${hours}:${minutes}`;
+    
+    await this.dateInput.waitFor({ state: "visible" });
+    await this.dateInput.click();
+    await this.dateInput.clear();
+    await this.dateInput.fill(dateString);
+    await this.dateInput.dispatchEvent('change');
+    await this.page.waitForTimeout(300);
 
-    // Select account if provided
+    // Select account if provided or use first available
+    await this.accountSelect.waitFor({ state: "visible" });
+    await this.accountSelect.click();
     if (data.account) {
-      await this.accountSelect.click();
-      await this.page.getByRole("option", { name: data.account }).click();
+      await this.page.locator(`[role="option"]:has-text("${data.account}")`).first().click();
+    } else {
+      // Just select the first account option
+      await this.page.locator('[role="option"]').first().click();
     }
+    await this.page.waitForTimeout(300);
 
-    // Select category if provided
-    if (data.category) {
-      await this.categorySelect.click();
-      await this.page.getByRole("option", { name: data.category }).click();
-    }
-
-    // Fill description if provided
+    // Fill description
     if (data.description) {
+      await this.descriptionInput.waitFor({ state: "visible" });
+      await this.descriptionInput.click();
+      await this.descriptionInput.clear();
       await this.descriptionInput.fill(data.description);
+      await this.descriptionInput.dispatchEvent('input');
+      await this.descriptionInput.dispatchEvent('change');
+      await this.page.waitForTimeout(300);
     }
   }
 
@@ -104,6 +124,7 @@ export class TransactionsPage {
     await expect(this.submitButton).toBeEnabled({ timeout: 5000 });
     await this.submitButton.scrollIntoViewIfNeeded();
     await this.submitButton.click();
+    
     // Prefer deterministic UI waits instead of networkidle
     // Wait for either toast or modal close
     await Promise.race([

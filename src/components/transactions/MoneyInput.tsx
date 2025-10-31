@@ -36,6 +36,7 @@ export function MoneyInput({ id, value, onChange, error, disabled }: MoneyInputP
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
           className="pl-7"
+          data-testid={`transaction-${id}`}
         />
       </div>
       {error && (

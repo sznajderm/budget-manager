@@ -1,9 +1,11 @@
 name = "budget-manager"
-compatibility_flags = ["nodejs_compat", "disable_nodejs_process_v2"]
+compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-10-31"
-pages_build_output_dir = "dist"
 
 # KV namespace for sessions
 [[kv_namespaces]]
 binding = "SESSION"
 id = "857dec90311f4302a8bcbdad5d8f04df"
+
+[site]
+bucket = "./dist"

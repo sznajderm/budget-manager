@@ -24,6 +24,7 @@ export function DateTimeInput({ id, value, onChange, error, disabled }: DateTime
         disabled={disabled}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
+        data-testid={`transaction-${id}`}
       />
       {error && (
         <p id={`${id}-error`} className="text-sm text-red-600" role="alert">

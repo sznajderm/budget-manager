@@ -29,13 +29,13 @@ export class TransactionsPage {
     this.modal = page.locator('[role="dialog"]');
     this.modalTitle = this.modal.locator("h2");
     // Scope inputs to the open modal to avoid interacting with hidden/detached nodes
-    this.amountInput = this.modal.locator("#amount_dollars");
-    this.typeSelect = this.modal.locator("#transaction_type");
-    this.dateInput = this.modal.locator("#transaction_date_input");
-    this.accountSelect = this.modal.locator("#account_id");
-    this.categorySelect = this.modal.locator("#category_id");
-    this.descriptionInput = this.modal.locator("#description");
-    this.submitButton = this.modal.getByRole("button", { name: /save|create/i });
+    this.amountInput = this.modal.locator('[data-testid="transaction-amount_dollars"]');
+    this.typeSelect = this.modal.locator('[data-testid="transaction-type-select"]');
+    this.dateInput = this.modal.locator('[data-testid="transaction-transaction_date_input"]');
+    this.accountSelect = this.modal.locator('[data-testid="transaction-account-select"]');
+    this.categorySelect = this.modal.locator('[data-testid="transaction-category-select"]');
+    this.descriptionInput = this.modal.locator('[data-testid="transaction-description-input"]');
+    this.submitButton = this.modal.locator('[data-testid="transaction-submit-button"]');
     this.cancelButton = this.modal.getByRole("button", { name: /cancel/i });
     this.errorMessage = this.modal.locator('[role="alert"]');
 

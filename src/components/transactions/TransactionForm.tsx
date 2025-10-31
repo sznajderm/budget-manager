@@ -125,7 +125,7 @@ export function TransactionForm({
           onValueChange={(value) => updateField("transaction_type", value as "income" | "expense")}
           disabled={submitting}
         >
-          <SelectTrigger id="transaction_type" aria-invalid={!!errors.transaction_type}>
+          <SelectTrigger id="transaction_type" aria-invalid={!!errors.transaction_type} data-testid="transaction-type-select">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -157,7 +157,7 @@ export function TransactionForm({
           onValueChange={(value) => updateField("account_id", value)}
           disabled={submitting}
         >
-          <SelectTrigger id="account_id" aria-invalid={!!errors.account_id}>
+          <SelectTrigger id="account_id" aria-invalid={!!errors.account_id} data-testid="transaction-account-select">
             <SelectValue placeholder="Select account" />
           </SelectTrigger>
           <SelectContent>
@@ -182,7 +182,7 @@ export function TransactionForm({
           onValueChange={(value) => updateField("category_id", value === "null" ? null : value)}
           disabled={submitting}
         >
-          <SelectTrigger id="category_id" aria-invalid={!!errors.category_id}>
+          <SelectTrigger id="category_id" aria-invalid={!!errors.category_id} data-testid="transaction-category-select">
             <SelectValue placeholder="Select category (optional)" />
           </SelectTrigger>
           <SelectContent>
@@ -215,6 +215,7 @@ export function TransactionForm({
           disabled={submitting}
           aria-invalid={!!errors.description}
           aria-describedby={errors.description ? "description-error" : undefined}
+          data-testid="transaction-description-input"
         />
         {errors.description && (
           <p id="description-error" className="text-sm text-red-600" role="alert">
@@ -229,7 +230,7 @@ export function TransactionForm({
             Cancel
           </Button>
         )}
-        <Button type="submit" disabled={submitting}>
+        <Button type="submit" disabled={submitting} data-testid="transaction-submit-button">
           {submitting
             ? mode === "create"
               ? "Creating..."

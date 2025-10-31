@@ -125,7 +125,7 @@ jobs:
       - name: Determine overall status
         id: status
         run: |
-          if [[ "${{ needs.lint.result }}" == "success" && "${{ needs.unit-test.result }}" == "success"]]; then
+          if [[ "${{ needs.lint.result }}" == "success" && "${{ needs.unit-test.result }}" == "success" ]]; then
             echo "status=✅ All checks passed!" >> $GITHUB_OUTPUT
             echo "emoji=✅" >> $GITHUB_OUTPUT
           else

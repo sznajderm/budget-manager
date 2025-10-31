@@ -28,12 +28,13 @@ export class TransactionsPage {
     // Modal elements
     this.modal = page.locator('[role="dialog"]');
     this.modalTitle = this.modal.locator('h2');
-    this.amountInput = page.locator('#amount_dollars');
-    this.typeSelect = page.locator('#transaction_type');
-    this.dateInput = page.locator('#transaction_date_input');
-    this.accountSelect = page.locator('#account_id');
-    this.categorySelect = page.locator('#category_id');
-    this.descriptionInput = page.locator('#description');
+    // Scope inputs to the open modal to avoid interacting with hidden/detached nodes
+    this.amountInput = this.modal.locator('input#amount_dollars');
+    this.typeSelect = this.modal.locator('#transaction_type');
+    this.dateInput = this.modal.locator('#transaction_date_input');
+    this.accountSelect = this.modal.locator('#account_id');
+    this.categorySelect = this.modal.locator('#category_id');
+    this.descriptionInput = this.modal.locator('#description');
     this.submitButton = this.modal.getByRole('button', { name: /save|create/i });
     this.cancelButton = this.modal.getByRole('button', { name: /cancel/i });
     this.errorMessage = this.modal.locator('[role="alert"]');
@@ -65,8 +66,13 @@ export class TransactionsPage {
     category?: string;
     description?: string;
   }) {
-    // Fill amount
-    await this.amountInput.fill(data.amount);
+    // Fill amount (robust for masked/controlled input)
+    await this.amountInput.waitFor({ state: 'visible' });
+    await expect(this.amountInput).toBeEditable();
+    await this.amountInput.click();
+    await this.amountInput.fill('');
+    await this.amountInput.type(data.amount, { delay: 20 });
+    await expect(this.amountInput).toHaveValue(data.amount);
 
     // Select type (using Radix UI SelectItem)
     await this.typeSelect.click();

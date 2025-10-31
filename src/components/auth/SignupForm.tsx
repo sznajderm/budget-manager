@@ -129,6 +129,7 @@ export function SignupForm() {
               disabled={submitting || !!successMessage}
               aria-invalid={!!validationErrors.email}
               placeholder="your@email.com"
+              data-testid="signup-email-input"
             />
             {validationErrors.email && (
               <p className="text-sm text-red-600" role="alert">
@@ -149,6 +150,7 @@ export function SignupForm() {
               disabled={submitting || !!successMessage}
               aria-invalid={!!validationErrors.password}
               placeholder="••••••••"
+              data-testid="signup-password-input"
             />
             {validationErrors.password && (
               <p className="text-sm text-red-600" role="alert">
@@ -172,6 +174,7 @@ export function SignupForm() {
               disabled={submitting || !!successMessage}
               aria-invalid={!!validationErrors.confirmPassword}
               placeholder="••••••••"
+              data-testid="signup-confirm-password-input"
             />
             {validationErrors.confirmPassword && (
               <p className="text-sm text-red-600" role="alert">
@@ -184,6 +187,7 @@ export function SignupForm() {
             type="submit"
             disabled={submitting || !!successMessage}
             className="w-full"
+            data-testid="signup-submit-button"
           >
             {submitting ? "Signing up..." : "Sign up"}
           </Button>

@@ -121,6 +121,7 @@ export function LoginForm() {
               disabled={submitting}
               aria-invalid={!!validationErrors.email}
               placeholder="your@email.com"
+              data-testid="login-email-input"
             />
             {validationErrors.email && (
               <p className="text-sm text-red-600" role="alert">
@@ -141,6 +142,7 @@ export function LoginForm() {
               disabled={submitting}
               aria-invalid={!!validationErrors.password}
               placeholder="••••••••"
+              data-testid="login-password-input"
             />
             {validationErrors.password && (
               <p className="text-sm text-red-600" role="alert">
@@ -158,7 +160,7 @@ export function LoginForm() {
             </a>
           </div>
 
-          <Button type="submit" disabled={submitting} className="w-full">
+          <Button type="submit" disabled={submitting} className="w-full" data-testid="login-submit-button">
             {submitting ? "Signing in..." : "Sign in"}
           </Button>
 

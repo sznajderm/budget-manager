@@ -116,6 +116,7 @@ export function PasswordRecoveryForm() {
               disabled={submitting}
               aria-invalid={!!validationErrors.email}
               placeholder="your@email.com"
+              data-testid="recovery-email-input"
             />
             {validationErrors.email && (
               <p className="text-sm text-red-600" role="alert">
@@ -124,7 +125,7 @@ export function PasswordRecoveryForm() {
             )}
           </div>
 
-          <Button type="submit" disabled={submitting} className="w-full">
+          <Button type="submit" disabled={submitting} className="w-full" data-testid="recovery-submit-button">
             {submitting ? "Sending..." : "Send Instructions"}
           </Button>
 

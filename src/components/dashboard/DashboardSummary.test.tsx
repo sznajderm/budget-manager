@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -60,10 +61,11 @@ function createTestWrapper() {
 }
 
 describe("DashboardSummary", () => {
-  const mockSetStartText = vi.fn();
-  const mockSetEndText = vi.fn();
+  const mockSetStartText = vi.fn() as unknown as React.Dispatch<React.SetStateAction<string>>;
+  const mockSetEndText = vi.fn() as unknown as React.Dispatch<React.SetStateAction<string>>;
   const mockApplyFromText = vi.fn();
   const mockResetToCurrentMonth = vi.fn();
+  const mockSetRange = vi.fn() as unknown as React.Dispatch<React.SetStateAction<{ startISO: string; endISO: string }>>;
   const mockRefetch = vi.fn();
 
   const defaultDateRangeMock = {
@@ -71,9 +73,11 @@ describe("DashboardSummary", () => {
     display: { startText: "01/01/2025 00:00", endText: "31/01/2025 23:59" },
     setStartText: mockSetStartText,
     setEndText: mockSetEndText,
-    applyFromText: mockApplyFromText,
-    resetToCurrentMonth: mockResetToCurrentMonth,
+    applyFromText: mockApplyFromText as unknown as () => boolean,
+    resetToCurrentMonth: mockResetToCurrentMonth as unknown as () => void,
+    isValid: true,
     error: undefined,
+    setRange: mockSetRange,
   };
 
   const defaultSummariesMock = {
@@ -93,12 +97,13 @@ describe("DashboardSummary", () => {
       error: null,
       refetch: mockRefetch,
     },
-  };
+    invalidateAll: vi.fn(async () => undefined),
+  } as unknown as ReturnType<typeof useSummaries>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useDashboardDateRange).mockReturnValue(defaultDateRangeMock);
-    vi.mocked(useSummaries).mockReturnValue(defaultSummariesMock);
+    vi.mocked(useSummaries).mockReturnValue(defaultSummariesMock as unknown as ReturnType<typeof useSummaries>);
   });
 
   describe("Rendering", () => {
@@ -243,7 +248,7 @@ describe("DashboardSummary", () => {
           ...defaultSummariesMock.expense,
           isLoading: true,
         },
-      });
+      } as unknown as ReturnType<typeof useSummaries>);
 
       render(<DashboardSummary />, { wrapper: createTestWrapper() });
 
@@ -258,7 +263,7 @@ describe("DashboardSummary", () => {
           ...defaultSummariesMock.income,
           isFetching: true,
         },
-      });
+      } as unknown as ReturnType<typeof useSummaries>);
 
       render(<DashboardSummary />, { wrapper: createTestWrapper() });
 
@@ -282,7 +287,7 @@ describe("DashboardSummary", () => {
           ...defaultSummariesMock.expense,
           data: expenseData,
         },
-      });
+      } as unknown as ReturnType<typeof useSummaries>);
 
       render(<DashboardSummary />, { wrapper: createTestWrapper() });
 
@@ -307,7 +312,7 @@ describe("DashboardSummary", () => {
           ...defaultSummariesMock.income,
           data: incomeData,
         },
-      });
+      } as unknown as ReturnType<typeof useSummaries>);
 
       render(<DashboardSummary />, { wrapper: createTestWrapper() });
 
@@ -324,7 +329,7 @@ describe("DashboardSummary", () => {
           isError: true,
           error: new Error("Failed to fetch expenses"),
         },
-      });
+      } as unknown as ReturnType<typeof useSummaries>);
 
       render(<DashboardSummary />, { wrapper: createTestWrapper() });
 
@@ -341,7 +346,7 @@ describe("DashboardSummary", () => {
           isError: true,
           error: new Error("Network error"),
         },
-      });
+      } as unknown as ReturnType<typeof useSummaries>);
 
       render(<DashboardSummary />, { wrapper: createTestWrapper() });
 
@@ -375,7 +380,7 @@ describe("DashboardSummary", () => {
 
       vi.mocked(useSummaries).mockImplementation(() => {
         hookCalls.push("useSummaries");
-        return defaultSummariesMock;
+        return defaultSummariesMock as unknown as ReturnType<typeof useSummaries>;
       });
 
       render(<DashboardSummary />, { wrapper: createTestWrapper() });

@@ -1,7 +1,7 @@
 name = "budget-manager"
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-10-31"
-main = "workers-site/index.js"
+main = "dist/_worker.js/index.js"
 
 # KV namespace for sessions
 [[kv_namespaces]]

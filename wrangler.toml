@@ -1,7 +1,7 @@
 name = "budget-manager"
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-10-31"
-main = "dist/_worker.js/index.js"
+main = "dist/_worker.js"
 
 # KV namespace for sessions
 [[kv_namespaces]]
@@ -9,4 +9,4 @@ binding = "SESSION"
 id = "857dec90311f4302a8bcbdad5d8f04df"
 
 [site]
-bucket = "./dist"
+bucket = "./dist/_worker.js"

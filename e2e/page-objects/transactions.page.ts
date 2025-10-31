@@ -107,8 +107,12 @@ export class TransactionsPage {
     // Prefer deterministic UI waits instead of networkidle
     // Wait for either toast or modal close
     await Promise.race([
-      this.toast.waitFor({ state: "visible", timeout: 5000 }).catch(() => {}),
-      this.modal.waitFor({ state: "hidden", timeout: 10000 }).catch(() => {}),
+      this.toast.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
+        // Ignore error
+      }),
+      this.modal.waitFor({ state: "hidden", timeout: 10000 }).catch(() => {
+        // Ignore error
+      }),
     ]);
   }
 

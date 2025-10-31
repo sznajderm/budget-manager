@@ -1,4 +1,3 @@
-import { FullConfig } from "@playwright/test";
 import { config as loadEnv } from "dotenv";
 import { cleanupTestUsers } from "./utils/test-cleanup";
 
@@ -9,7 +8,7 @@ loadEnv({ path: ".env.test" });
  * Global setup runs once before all tests.
  * Cleans up any leftover test users from previous runs.
  */
-async function globalSetup(config: FullConfig) {
+async function globalSetup() {
   console.log("\n🧹 Running global test cleanup...");
 
   try {

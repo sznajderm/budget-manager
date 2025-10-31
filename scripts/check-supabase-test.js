@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-undef */
 import { createClient } from "@supabase/supabase-js";
 import { config as loadEnv } from "dotenv";
 

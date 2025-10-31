@@ -110,7 +110,7 @@ export function TransactionsIsland() {
     setSelectedTx(null);
   };
 
-  const handleCreate = async (payload: any) => {
+  const handleCreate = async (payload: Record<string, unknown>) => {
     try {
       await createMutation.mutateAsync(payload);
       toast.success("Transaction created successfully");
@@ -121,7 +121,7 @@ export function TransactionsIsland() {
     }
   };
 
-  const handleUpdate = async (id: string, payload: any) => {
+  const handleUpdate = async (id: string, payload: Record<string, unknown>) => {
     try {
       await updateMutation.mutateAsync({ id, payload });
       toast.success("Transaction updated successfully");

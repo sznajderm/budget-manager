@@ -29,7 +29,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
   // Handle 204 No Content
   if (res.status === 204) {
-    return undefined as T;
+    return undefined as unknown as T;
   }
 
   return res.json() as Promise<T>;
@@ -99,5 +99,5 @@ export async function deleteTransaction(id: string): Promise<void> {
     credentials: "include",
   });
 
-  await handleResponse<void>(res);
+  await handleResponse<undefined>(res);
 }

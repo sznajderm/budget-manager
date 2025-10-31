@@ -1,4 +1,3 @@
-import { FullConfig } from "@playwright/test";
 import { config as loadEnv } from "dotenv";
 import { cleanupTestUsers } from "./utils/test-cleanup";
 
@@ -9,7 +8,7 @@ loadEnv({ path: ".env.test" });
  * Global teardown runs once after all tests complete.
  * Cleans up test users created during the test run.
  */
-async function globalTeardown(config: FullConfig) {
+async function globalTeardown() {
   console.log("\n🧹 Running post-test cleanup...");
 
   try {

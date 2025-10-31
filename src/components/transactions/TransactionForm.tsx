@@ -100,11 +100,9 @@ export function TransactionForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field when user starts typing
     if (errors[field]) {
-      setValidationErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [field]: _, ...rest } = validationErrors;
+      setValidationErrors(rest);
     }
   };
 

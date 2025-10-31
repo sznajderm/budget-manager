@@ -63,11 +63,9 @@ export function PasswordRecoveryForm() {
   const updateField = <K extends keyof RecoverFormValues>(field: K, value: RecoverFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (validationErrors[field]) {
-      setValidationErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [field]: _, ...rest } = validationErrors;
+      setValidationErrors(rest);
     }
     if (serverError) {
       setServerError("");

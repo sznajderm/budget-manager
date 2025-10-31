@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { SupabaseClient } from "../../db/supabase.client";
-import type { TransactionType, TransactionDTO, TransactionUpdateCommand } from "../../types";
+import type { TransactionType, TransactionDTO } from "../../types";
 
 // Validation schema for transaction creation
 export const TransactionCreateSchema = z.object({
@@ -327,7 +327,11 @@ export async function updateTransaction(
     }
 
     // Update transaction in database with automatic updated_at timestamp
-    const updatePayload: any = {};
+    const updatePayload: Partial<{
+      amount_cents: number;
+      description: string;
+      category_id: string | null;
+    }> = {};
     if (validatedData.amount_cents !== undefined) {
       updatePayload.amount_cents = validatedData.amount_cents;
     }

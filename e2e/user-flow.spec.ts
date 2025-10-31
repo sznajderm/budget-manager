@@ -4,18 +4,15 @@ import { DashboardPage } from "./page-objects/dashboard.page";
 import { TransactionsPage } from "./page-objects/transactions.page";
 
 test.describe("Complete User Flow", () => {
-  test("should register user, navigate through pages, create transactions, and verify summaries", async ({
-    page,
-    context,
-  }) => {
+  test("should register user, navigate through pages, create transactions, and verify summaries", async ({ page }) => {
     // Playwright creates a fresh context per test; explicit clearing usually not needed.
 
     const signinPage = new SigninPage(page);
     const dashboardPage = new DashboardPage(page);
     const transactionsPage = new TransactionsPage(page);
 
-    const testEmail = process.env.E2E_USERNAME!;
-    const testPassword = process.env.E2E_PASSWORD!;
+    const testEmail = process.env.E2E_USERNAME as string;
+    const testPassword = process.env.E2E_PASSWORD as string;
 
     // Step 1: Sign in with existing user
     await signinPage.goto();

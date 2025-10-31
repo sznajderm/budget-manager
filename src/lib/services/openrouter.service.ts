@@ -366,6 +366,9 @@ export class OpenRouterService {
       }
     }
 
-    throw lastError!;
+    if (lastError) {
+      throw lastError;
+    }
+    throw new Error("All retry attempts failed");
   }
 }

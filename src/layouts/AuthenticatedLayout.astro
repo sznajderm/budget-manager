@@ -118,22 +118,18 @@ const currentPath = Astro.url.pathname;
   </body>
 </html>
 
-<script>
+<script is:inline>
   document.addEventListener("DOMContentLoaded", () => {
+    /* eslint-disable no-console */
     const logoutButton = document.getElementById("logout-button");
-
     if (logoutButton) {
       logoutButton.addEventListener("click", async () => {
         try {
           const response = await fetch("/api/auth/logout", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           });
-
           if (response.ok) {
-            // Redirect to login page after successful logout
             window.location.href = "/login";
           } else {
             console.error("Logout failed");

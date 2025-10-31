@@ -10,6 +10,7 @@
  * Or create a standalone test file and run with ts-node or similar.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 import { OpenRouterService } from "../openrouter.service";
 import type { ChatCompletionRequest } from "../../../types";
 

@@ -10,7 +10,21 @@ import type { SummaryVM } from "./types";
 vi.mock("@/hooks/useDashboardDateRange");
 vi.mock("@/hooks/useSummaries");
 vi.mock("./SummaryCard", () => ({
-  default: ({ title, kind, data, isLoading, error, onRetry }: any) => (
+  default: ({
+    title,
+    kind,
+    data,
+    isLoading,
+    error,
+    onRetry,
+  }: {
+    title: string;
+    kind: string;
+    data: SummaryVM | undefined;
+    isLoading: boolean;
+    error: string | null;
+    onRetry: () => void;
+  }) => (
     <div data-testid={`summary-card-${kind}`}>
       <h2>{title}</h2>
       {isLoading && <div>Loading...</div>}
@@ -38,9 +52,11 @@ function createTestWrapper() {
       },
     },
   });
-  return ({ children }: { children: React.ReactNode }) => (
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  TestWrapper.displayName = "TestWrapper";
+  return TestWrapper;
 }
 
 describe("DashboardSummary", () => {

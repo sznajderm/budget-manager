@@ -145,7 +145,8 @@ describe("cn() - Class name utility", () => {
     it("should handle Input component styling with disabled state", () => {
       const baseClasses = "w-full px-3 py-2 rounded-md border bg-white";
       const focusClasses = "focus:outline-none focus:ring-2 focus:ring-primary";
-      const disabledClasses = true ? "opacity-50 cursor-not-allowed" : "";
+      const isDisabled = true;
+      const disabledClasses = isDisabled ? "opacity-50 cursor-not-allowed" : "";
 
       const result = cn(baseClasses, focusClasses, disabledClasses);
       expect(result).toContain("w-full");
@@ -185,8 +186,10 @@ describe("cn() - Class name utility", () => {
     it("should handle complex form field scenario", () => {
       const baseClasses = "block w-full rounded-md border-gray-300 shadow-sm";
       const focusClasses = "focus:border-blue-500 focus:ring-blue-500";
-      const errorClasses = true ? "border-red-500" : "border-gray-300";
-      const disabledClasses = false ? "bg-gray-100 cursor-not-allowed" : "";
+      const hasError = true;
+      const isDisabled = false;
+      const errorClasses = hasError ? "border-red-500" : "border-gray-300";
+      const disabledClasses = isDisabled ? "bg-gray-100 cursor-not-allowed" : "";
 
       const result = cn(baseClasses, focusClasses, errorClasses, disabledClasses);
       expect(result).toContain("block");

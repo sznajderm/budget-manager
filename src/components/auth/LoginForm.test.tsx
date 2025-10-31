@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "./LoginForm";
 
@@ -240,7 +241,7 @@ describe("LoginForm", () => {
       // Button should be enabled before submission
       expect(submitButton).not.toBeDisabled();
 
-      fireEvent.click(submitButton);
+      await user.click(submitButton);
 
       // During submission, button should be disabled and show loading text
       await waitFor(() => {
@@ -410,7 +411,7 @@ describe("LoginForm", () => {
       await user.type(passwordInput, "ValidPass123");
 
       const submitButton = screen.getByRole("button", { name: /sign in/i });
-      fireEvent.click(submitButton);
+      await user.click(submitButton);
 
       await waitFor(() => {
         expect(emailInput).toBeDisabled();

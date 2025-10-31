@@ -23,7 +23,7 @@ export function LoginForm() {
     }
     return "";
   });
-  const [successMessage, setSuccessMessage] = useState<string>(() => {
+  const [successMessage] = useState<string>(() => {
     // Check for success message in URL params
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -75,11 +75,9 @@ export function LoginForm() {
   const updateField = <K extends keyof LoginFormValues>(field: K, value: LoginFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (validationErrors[field]) {
-      setValidationErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [field]: _, ...rest } = validationErrors;
+      setValidationErrors(rest);
     }
     if (serverError) {
       setServerError("");
@@ -165,7 +163,7 @@ export function LoginForm() {
           </Button>
 
           <div className="text-center text-sm text-muted-foreground pt-2">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a href="/signup" className="text-primary hover:underline">
               Sign up
             </a>

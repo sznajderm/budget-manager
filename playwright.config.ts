@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { config as loadEnv } from 'dotenv';
+
+// Load test environment variables from .env.test for the entire Playwright process
+loadEnv({ path: '.env.test' });
 
 export default defineConfig({
   testDir: './e2e',
@@ -29,5 +33,7 @@ export default defineConfig({
     command: 'npm run build && npm run preview -- --port=3010',
     url: 'http://localhost:3010',
     reuseExistingServer: !process.env.CI,
+    // Ensure the preview server inherits the same env (including DB env from .env.test)
+    env: process.env as Record<string, string>,
   },
 });

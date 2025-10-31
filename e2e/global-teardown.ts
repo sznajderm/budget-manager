@@ -2,8 +2,8 @@ import { FullConfig } from '@playwright/test';
 import { config as loadEnv } from 'dotenv';
 import { cleanupTestUsers } from './utils/test-cleanup';
 
-// Load environment variables
-loadEnv();
+// Load environment variables from .env.test
+loadEnv({ path: '.env.test' });
 
 /**
  * Global teardown runs once after all tests complete.

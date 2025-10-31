@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 interface CleanupResult {
-  deletedUsers: number;
+  deletedUsers: number; // kept for backward compatibility with existing callers
   errors: string[];
 }
 
 /**
- * Deletes all users with 'test' in their email and cascades to related records.
+ * Deletes all transactions for a specific user (by ID).
+ * Also deletes dependent AI suggestions to satisfy foreign key constraints.
  * Uses Supabase service role key for admin operations.
  */
 export async function cleanupTestUsers(): Promise<CleanupResult> {
@@ -27,50 +28,56 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
     },
   });
 
+  const TARGET_USER_ID = '4bce0e79-2c01-4e1d-a3cb-45e3990d8c1a';
+
   const result: CleanupResult = {
-    deletedUsers: 0,
+    deletedUsers: 0, // represents number of deleted transactions
     errors: [],
   };
 
   try {
-    // Get all users with 'test' in their email using admin API
-    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+    // 1) Find all transactions for the target user
+    const { data: transactions, error: listTxError } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('user_id', TARGET_USER_ID);
 
-    if (listError) {
-      result.errors.push(`Failed to list users: ${listError.message}`);
+    if (listTxError) {
+      result.errors.push(`Failed to list transactions: ${listTxError.message}`);
       return result;
     }
 
-    if (!users || users.length === 0) {
+    if (!transactions || transactions.length === 0) {
       return result;
     }
 
-    // Filter test users (case-insensitive)
-    const testUsers = users.filter(
-      (user) => user.email?.toLowerCase().includes('test')
-    );
+    const transactionIds = transactions.map((t) => t.id);
 
-    // Delete each test user (cascade will handle related records via foreign keys)
-    for (const user of testUsers) {
-      try {
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(
-          user.id
-        );
+    // 2) Delete dependent AI suggestions referencing these transactions (if any)
+    const { error: delSuggestErr } = await supabase
+      .from('ai_suggestions')
+      .delete()
+      .in('transaction_id', transactionIds);
 
-        if (deleteError) {
-          result.errors.push(
-            `Failed to delete user ${user.email}: ${deleteError.message}`
-          );
-        } else {
-          result.deletedUsers++;
-          console.log(`✓ Deleted test user: ${user.email}`);
-        }
-      } catch (error) {
-        result.errors.push(
-          `Exception deleting user ${user.email}: ${error instanceof Error ? error.message : String(error)}`
-        );
-      }
+    if (delSuggestErr) {
+      result.errors.push(`Failed to delete ai_suggestions: ${delSuggestErr.message}`);
+      // continue to attempt deleting transactions regardless
     }
+
+    // 3) Delete transactions for the target user and count how many were deleted
+    const { count, error: delTxError } = await supabase
+      .from('transactions')
+      .delete({ count: 'exact' })
+      .in('id', transactionIds)
+      .select('id');
+
+    if (delTxError) {
+      result.errors.push(`Failed to delete transactions: ${delTxError.message}`);
+      return result;
+    }
+
+    result.deletedUsers = count ?? 0;
+    console.log(`✓ Deleted ${result.deletedUsers} transaction(s) for user ${TARGET_USER_ID}`);
   } catch (error) {
     result.errors.push(
       `Cleanup failed: ${error instanceof Error ? error.message : String(error)}`
@@ -85,11 +92,11 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
  * Useful for manual cleanup scripts.
  */
 export async function runCleanup() {
-  console.log('Starting test user cleanup...');
+  console.log('Starting transactions cleanup for target user...');
   const result = await cleanupTestUsers();
   
   console.log(`\nCleanup complete:`);
-  console.log(`- Deleted users: ${result.deletedUsers}`);
+  console.log(`- Deleted transactions: ${result.deletedUsers}`);
   
   if (result.errors.length > 0) {
     console.error(`\nErrors encountered:`);

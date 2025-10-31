@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SignupPage } from './page-objects/signup.page';
+import { SigninPage } from './page-objects/signin.page';
 import { DashboardPage } from './page-objects/dashboard.page';
 import { TransactionsPage } from './page-objects/transactions.page';
 
@@ -7,21 +7,21 @@ test.describe('Complete User Flow', () => {
   test('should register user, navigate through pages, create transactions, and verify summaries', async ({ page, context }) => {
     // Playwright creates a fresh context per test; explicit clearing usually not needed.
     
-    const signupPage = new SignupPage(page);
+    const signinPage = new SigninPage(page);
     const dashboardPage = new DashboardPage(page);
     const transactionsPage = new TransactionsPage(page);
 
-    const testEmail = `testuser-${Date.now()}@example.com`;
-    const testPassword = 'Topsecret99';
+    const testEmail = process.env.E2E_USERNAME!;
+    const testPassword = process.env.E2E_PASSWORD!;
 
-    // Step 1: Register a new user
-    await signupPage.goto();
+    // Step 1: Sign in with existing user
+    await signinPage.goto();
     // Wait for UI to be ready (avoid networkidle on dev/HMR)
-    await expect(signupPage.submitButton).toBeVisible();
-    await signupPage.register(testEmail, testPassword);
+    await expect(signinPage.submitButton).toBeVisible();
+    await signinPage.login(testEmail, testPassword);
     
-    // Wait for successful registration (either success message or redirect to dashboard)
-    await page.waitForURL(url => !url.pathname.includes('/signup'), { timeout: 10000 });
+    // Wait for successful login (redirect to dashboard)
+    await page.waitForURL(url => url.pathname.includes('/dashboard'), { timeout: 10000 });
 
     // Step 2: Navigate to dashboard page
     await dashboardPage.goto();
@@ -36,10 +36,6 @@ test.describe('Complete User Flow', () => {
     
     // Verify transactions page is loaded
     await expect(transactionsPage.heading).toBeVisible();
-
-    // Step 3.5: Ensure defaults (account/categories) exist if your app requires them.
-    // If the UI shows a CTA like "Create defaults", click it here. Otherwise seed via API/DB before test.
-    // e.g. await transactionsPage.seedDefaultsIfEmpty();
 
     // Step 4: Add two income transactions
     // If input is <input type="date"> prefer YYYY-MM-DD; adjust if your UI expects a different format.

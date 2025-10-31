@@ -28,7 +28,12 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
     },
   });
 
-  const TARGET_USER_ID = '4bce0e79-2c01-4e1d-a3cb-45e3990d8c1a';
+  const TARGET_USER_ID = process.env.E2E_USERNAME_ID;
+  if (!TARGET_USER_ID) {
+    throw new Error(
+      'Missing required environment variable: E2E_USERNAME_ID'
+    );
+  }
 
   const result: CleanupResult = {
     deletedUsers: 0, // represents number of deleted transactions

@@ -1,5 +1,5 @@
-import QueryProvider from '@/components/QueryClientProvider';
-import DashboardSummary from './DashboardSummary';
+import QueryProvider from "@/components/QueryClientProvider";
+import DashboardSummary from "./DashboardSummary";
 
 export default function DashboardWrapper() {
   return (

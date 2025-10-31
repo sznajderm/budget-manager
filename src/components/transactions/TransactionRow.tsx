@@ -9,23 +9,15 @@ interface TransactionRowProps {
   onDelete: (item: TransactionVM) => void;
 }
 
-export function TransactionRow({
-  item,
-  onEdit,
-  onDelete,
-}: TransactionRowProps) {
+export function TransactionRow({ item, onEdit, onDelete }: TransactionRowProps) {
   return (
     <TableRow>
-      <TableCell className="whitespace-nowrap">
-        {formatISOToUI(item.transactionDateISO)}
-      </TableCell>
+      <TableCell className="whitespace-nowrap">{formatISOToUI(item.transactionDateISO)}</TableCell>
       <TableCell>{item.description || "—"}</TableCell>
       <TableCell>{item.accountName}</TableCell>
       <TableCell>{item.categoryName}</TableCell>
       <TableCell className="capitalize">{item.type}</TableCell>
-      <TableCell className={`text-right font-medium ${item.amountClassName}`}>
-        {item.amountFormatted}
-      </TableCell>
+      <TableCell className={`text-right font-medium ${item.amountClassName}`}>{item.amountFormatted}</TableCell>
       <TableCell className="text-right">
         <div className="flex gap-2 justify-end">
           <Button

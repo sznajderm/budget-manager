@@ -25,9 +25,7 @@ const currentPath = Astro.url.pathname;
         <div class="flex h-full flex-col">
           <!-- Logo/Brand -->
           <div class="flex h-16 items-center border-b border-sidebar-border px-6">
-            <h1 class="text-lg font-semibold text-sidebar-foreground">
-              Budget Manager
-            </h1>
+            <h1 class="text-lg font-semibold text-sidebar-foreground">Budget Manager</h1>
           </div>
 
           <!-- Navigation -->
@@ -121,29 +119,29 @@ const currentPath = Astro.url.pathname;
 </html>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const logoutButton = document.getElementById('logout-button');
-    
+  document.addEventListener("DOMContentLoaded", () => {
+    const logoutButton = document.getElementById("logout-button");
+
     if (logoutButton) {
-      logoutButton.addEventListener('click', async () => {
+      logoutButton.addEventListener("click", async () => {
         try {
-          const response = await fetch('/api/auth/logout', {
-            method: 'POST',
+          const response = await fetch("/api/auth/logout", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           });
 
           if (response.ok) {
             // Redirect to login page after successful logout
-            window.location.href = '/login';
+            window.location.href = "/login";
           } else {
-            console.error('Logout failed');
-            alert('Failed to logout. Please try again.');
+            console.error("Logout failed");
+            alert("Failed to logout. Please try again.");
           }
         } catch (error) {
-          console.error('Error during logout:', error);
-          alert('An error occurred during logout.');
+          console.error("Error during logout:", error);
+          alert("An error occurred during logout.");
         }
       });
     }

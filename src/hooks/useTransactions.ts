@@ -1,16 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  fetchTransactions,
-  createTransaction,
-  updateTransaction,
-  deleteTransaction,
-} from "@/lib/api/transactions";
+import { fetchTransactions, createTransaction, updateTransaction, deleteTransaction } from "@/lib/api/transactions";
 import { fetchAccounts } from "@/lib/api/accounts";
 import { fetchCategories } from "@/lib/api/categories";
-import type {
-  TransactionCreatePayload,
-  TransactionUpdatePayload,
-} from "@/lib/transactions/types";
+import type { TransactionCreatePayload, TransactionUpdatePayload } from "@/lib/transactions/types";
 
 /**
  * Hook to fetch paginated transactions list
@@ -51,8 +43,7 @@ export function useCreateTransactionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: TransactionCreatePayload) =>
-      createTransaction(payload),
+    mutationFn: (payload: TransactionCreatePayload) => createTransaction(payload),
     onSuccess: () => {
       // Invalidate all transactions queries to refetch
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
@@ -67,13 +58,7 @@ export function useUpdateTransactionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: string;
-      payload: TransactionUpdatePayload;
-    }) => updateTransaction(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: TransactionUpdatePayload }) => updateTransaction(id, payload),
     onSuccess: () => {
       // Invalidate all transactions queries to refetch
       queryClient.invalidateQueries({ queryKey: ["transactions"] });

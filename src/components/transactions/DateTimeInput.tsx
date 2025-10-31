@@ -9,13 +9,7 @@ interface DateTimeInputProps {
   disabled?: boolean;
 }
 
-export function DateTimeInput({
-  id,
-  value,
-  onChange,
-  error,
-  disabled,
-}: DateTimeInputProps) {
+export function DateTimeInput({ id, value, onChange, error, disabled }: DateTimeInputProps) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>
@@ -36,9 +30,7 @@ export function DateTimeInput({
           {error}
         </p>
       )}
-      <p className="text-xs text-muted-foreground">
-        Format: DD/MM/YYYY HH:mm (e.g., 25/12/2024 14:30)
-      </p>
+      <p className="text-xs text-muted-foreground">Format: DD/MM/YYYY HH:mm (e.g., 25/12/2024 14:30)</p>
     </div>
   );
 }

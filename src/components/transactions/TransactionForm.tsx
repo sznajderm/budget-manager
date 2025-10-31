@@ -2,13 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MoneyInput } from "./MoneyInput";
 import { DateTimeInput } from "./DateTimeInput";
 import {
@@ -81,7 +75,7 @@ export function TransactionForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous validation errors
     setValidationErrors({});
 
@@ -102,10 +96,7 @@ export function TransactionForm({
     }
   };
 
-  const updateField = <K extends keyof TransactionFormValues>(
-    field: K,
-    value: TransactionFormValues[K]
-  ) => {
+  const updateField = <K extends keyof TransactionFormValues>(field: K, value: TransactionFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field when user starts typing
     if (errors[field]) {
@@ -133,9 +124,7 @@ export function TransactionForm({
         </Label>
         <Select
           value={formData.transaction_type}
-          onValueChange={(value) =>
-            updateField("transaction_type", value as "income" | "expense")
-          }
+          onValueChange={(value) => updateField("transaction_type", value as "income" | "expense")}
           disabled={submitting}
         >
           <SelectTrigger id="transaction_type" aria-invalid={!!errors.transaction_type}>
@@ -192,9 +181,7 @@ export function TransactionForm({
         <Label htmlFor="category_id">Category</Label>
         <Select
           value={formData.category_id || "null"}
-          onValueChange={(value) =>
-            updateField("category_id", value === "null" ? null : value)
-          }
+          onValueChange={(value) => updateField("category_id", value === "null" ? null : value)}
           disabled={submitting}
         >
           <SelectTrigger id="category_id" aria-invalid={!!errors.category_id}>
@@ -240,12 +227,7 @@ export function TransactionForm({
 
       <div className="flex gap-2 justify-end pt-4">
         {onCancel && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={submitting}
-          >
+          <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
             Cancel
           </Button>
         )}
@@ -255,8 +237,8 @@ export function TransactionForm({
               ? "Creating..."
               : "Updating..."
             : mode === "create"
-            ? "Create Transaction"
-            : "Update Transaction"}
+              ? "Create Transaction"
+              : "Update Transaction"}
         </Button>
       </div>
     </form>

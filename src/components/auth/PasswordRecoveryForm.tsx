@@ -39,9 +39,7 @@ export function PasswordRecoveryForm() {
       });
 
       if (response.ok) {
-      setSuccessMessage(
-          "We've sent password reset instructions to your email. Please check your inbox."
-        );
+        setSuccessMessage("We've sent password reset instructions to your email. Please check your inbox.");
         setFormData({ email: "", redirectTo: "/auth/callback" });
       } else {
         const data = await response.json();
@@ -62,10 +60,7 @@ export function PasswordRecoveryForm() {
     }
   };
 
-  const updateField = <K extends keyof RecoverFormValues>(
-    field: K,
-    value: RecoverFormValues[K]
-  ) => {
+  const updateField = <K extends keyof RecoverFormValues>(field: K, value: RecoverFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (validationErrors[field]) {
       setValidationErrors((prev) => {
@@ -86,20 +81,24 @@ export function PasswordRecoveryForm() {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Password Recovery</CardTitle>
-        <CardDescription>
-          Enter your email address to receive password reset instructions
-        </CardDescription>
+        <CardDescription>Enter your email address to receive password reset instructions</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {serverError && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-200 dark:border-red-900" role="alert">
+            <div
+              className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-md border border-red-200 dark:border-red-900"
+              role="alert"
+            >
               {serverError}
             </div>
           )}
 
           {successMessage && (
-            <div className="p-3 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-200 dark:border-green-900" role="status">
+            <div
+              className="p-3 text-sm text-green-600 bg-green-50 dark:bg-green-950/30 rounded-md border border-green-200 dark:border-green-900"
+              role="status"
+            >
               {successMessage}
             </div>
           )}

@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from "@playwright/test";
 
 export class SignupPage {
   readonly page: Page;
@@ -12,17 +12,17 @@ export class SignupPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.locator('#email');
-    this.passwordInput = page.locator('#password');
-    this.confirmPasswordInput = page.locator('#confirmPassword');
-    this.submitButton = page.getByRole('button', { name: /zarejestruj się/i });
+    this.emailInput = page.locator("#email");
+    this.passwordInput = page.locator("#password");
+    this.confirmPasswordInput = page.locator("#confirmPassword");
+    this.submitButton = page.getByRole("button", { name: /zarejestruj się/i });
     this.successMessage = page.locator('[role="status"]');
     this.errorMessage = page.locator('[role="alert"]').first();
-    this.loginLink = page.getByRole('link', { name: /Log in/i });
+    this.loginLink = page.getByRole("link", { name: /Log in/i });
   }
 
   async goto() {
-    await this.page.goto('/signup');
+    await this.page.goto("/signup");
   }
 
   async fillForm(email: string, password: string, confirmPassword?: string) {
@@ -32,7 +32,7 @@ export class SignupPage {
   }
 
   async submit() {
-    await this.submitButton.waitFor({ state: 'visible' });
+    await this.submitButton.waitFor({ state: "visible" });
     await expect(this.submitButton).toBeEnabled();
     await this.submitButton.click();
   }
@@ -43,11 +43,11 @@ export class SignupPage {
   }
 
   async waitForSuccessMessage() {
-    await this.successMessage.waitFor({ state: 'visible' });
+    await this.successMessage.waitFor({ state: "visible" });
   }
 
   async waitForErrorMessage() {
-    await this.errorMessage.waitFor({ state: 'visible' });
+    await this.errorMessage.waitFor({ state: "visible" });
   }
 
   async isSubmitButtonDisabled(): Promise<boolean> {
@@ -56,11 +56,11 @@ export class SignupPage {
 
   async getErrorMessageText(): Promise<string> {
     await this.waitForErrorMessage();
-    return await this.errorMessage.textContent() || '';
+    return (await this.errorMessage.textContent()) || "";
   }
 
   async getSuccessMessageText(): Promise<string> {
     await this.waitForSuccessMessage();
-    return await this.successMessage.textContent() || '';
+    return (await this.successMessage.textContent()) || "";
   }
 }

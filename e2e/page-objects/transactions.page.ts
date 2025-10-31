@@ -1,4 +1,4 @@
-import { type Page, type Locator, expect } from '@playwright/test';
+import { type Page, type Locator, expect } from "@playwright/test";
 
 export class TransactionsPage {
   readonly page: Page;
@@ -20,63 +20,63 @@ export class TransactionsPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByRole('heading', { name: /^transactions$/i });
+    this.heading = page.getByRole("heading", { name: /^transactions$/i });
     // Use .first() to select the header button when there are multiple Add Transaction buttons
-    this.addButton = page.getByRole('button', { name: /add transaction/i }).first();
-    this.transactionsTable = page.locator('table').first();
-    
+    this.addButton = page.getByRole("button", { name: /add transaction/i }).first();
+    this.transactionsTable = page.locator("table").first();
+
     // Modal elements
     this.modal = page.locator('[role="dialog"]');
-    this.modalTitle = this.modal.locator('h2');
+    this.modalTitle = this.modal.locator("h2");
     // Scope inputs to the open modal to avoid interacting with hidden/detached nodes
-    this.amountInput = this.modal.locator('input#amount_dollars');
-    this.typeSelect = this.modal.locator('#transaction_type');
-    this.dateInput = this.modal.locator('#transaction_date_input');
-    this.accountSelect = this.modal.locator('#account_id');
-    this.categorySelect = this.modal.locator('#category_id');
-    this.descriptionInput = this.modal.locator('#description');
-    this.submitButton = this.modal.getByRole('button', { name: /save|create/i });
-    this.cancelButton = this.modal.getByRole('button', { name: /cancel/i });
+    this.amountInput = this.modal.locator("input#amount_dollars");
+    this.typeSelect = this.modal.locator("#transaction_type");
+    this.dateInput = this.modal.locator("#transaction_date_input");
+    this.accountSelect = this.modal.locator("#account_id");
+    this.categorySelect = this.modal.locator("#category_id");
+    this.descriptionInput = this.modal.locator("#description");
+    this.submitButton = this.modal.getByRole("button", { name: /save|create/i });
+    this.cancelButton = this.modal.getByRole("button", { name: /cancel/i });
     this.errorMessage = this.modal.locator('[role="alert"]');
-    
+
     // Toast notifications
-    this.toast = page.locator('[data-sonner-toast]');
+    this.toast = page.locator("[data-sonner-toast]");
   }
 
   async goto() {
-    await this.page.goto('/transactions');
+    await this.page.goto("/transactions");
   }
 
   async waitForLoad() {
-    await this.heading.waitFor({ state: 'visible' });
+    await this.heading.waitFor({ state: "visible" });
   }
 
   async clickAddTransaction() {
-    await this.addButton.waitFor({ state: 'visible' });
+    await this.addButton.waitFor({ state: "visible" });
     await expect(this.addButton).toBeEnabled();
     await this.addButton.click({ timeout: 10000 });
-    await this.modal.waitFor({ state: 'visible', timeout: 15000 });
+    await this.modal.waitFor({ state: "visible", timeout: 15000 });
   }
 
   async fillTransactionForm(data: {
     amount: string;
-    type: 'expense' | 'income';
+    type: "expense" | "income";
     date?: string;
     account?: string;
     category?: string;
     description?: string;
   }) {
     // Fill amount (robust for masked/controlled input)
-    await this.amountInput.waitFor({ state: 'visible' });
+    await this.amountInput.waitFor({ state: "visible" });
     await expect(this.amountInput).toBeEditable();
     await this.amountInput.click();
-    await this.amountInput.fill('');
+    await this.amountInput.fill("");
     await this.amountInput.type(data.amount, { delay: 20 });
     await expect(this.amountInput).toHaveValue(data.amount);
 
     // Select type (using Radix UI SelectItem)
     await this.typeSelect.click();
-    await this.page.getByRole('option', { name: data.type === 'expense' ? 'Expense' : 'Income' }).click();
+    await this.page.getByRole("option", { name: data.type === "expense" ? "Expense" : "Income" }).click();
 
     // Fill date if provided
     // if (data.date) {
@@ -86,13 +86,13 @@ export class TransactionsPage {
     // Select account if provided
     if (data.account) {
       await this.accountSelect.click();
-      await this.page.getByRole('option', { name: data.account }).click();
+      await this.page.getByRole("option", { name: data.account }).click();
     }
 
     // Select category if provided
     if (data.category) {
       await this.categorySelect.click();
-      await this.page.getByRole('option', { name: data.category }).click();
+      await this.page.getByRole("option", { name: data.category }).click();
     }
 
     // Fill description if provided
@@ -102,21 +102,21 @@ export class TransactionsPage {
   }
 
   async submitForm() {
-    await this.submitButton.waitFor({ state: 'visible' });
+    await this.submitButton.waitFor({ state: "visible" });
     await expect(this.submitButton).toBeEnabled({ timeout: 5000 });
     await this.submitButton.scrollIntoViewIfNeeded();
     await this.submitButton.click();
     // Prefer deterministic UI waits instead of networkidle
     // Wait for either toast or modal close
     await Promise.race([
-      this.toast.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
-      this.modal.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {}),
+      this.toast.waitFor({ state: "visible", timeout: 5000 }).catch(() => {}),
+      this.modal.waitFor({ state: "hidden", timeout: 10000 }).catch(() => {}),
     ]);
   }
 
   async createTransaction(data: {
     amount: string;
-    type: 'expense' | 'income';
+    type: "expense" | "income";
     date?: string;
     account?: string;
     category?: string;
@@ -128,7 +128,7 @@ export class TransactionsPage {
   }
 
   async waitForModalClose() {
-    await this.modal.waitFor({ state: 'hidden', timeout: 10000 });
+    await this.modal.waitFor({ state: "hidden", timeout: 10000 });
   }
 
   async waitForSuccessToast() {
@@ -137,7 +137,7 @@ export class TransactionsPage {
   }
 
   async getTransactionRows() {
-    return this.transactionsTable.locator('tbody tr');
+    return this.transactionsTable.locator("tbody tr");
   }
 
   async getTransactionCount(): Promise<number> {
@@ -167,29 +167,29 @@ export class TransactionsPage {
   async getTransactionAmount(description: string): Promise<string | null> {
     const row = await this.findTransactionByDescription(description);
     if (!row) return null;
-    
+
     // Find the amount cell (typically has currency symbol)
-    const amountCell = row.locator('td').filter({ hasText: /\$/ }).first();
+    const amountCell = row.locator("td").filter({ hasText: /\$/ }).first();
     return await amountCell.textContent();
   }
 
   async getTransactionType(description: string): Promise<string | null> {
     const row = await this.findTransactionByDescription(description);
     if (!row) return null;
-    
+
     // Look for expense/income indicators
-    const cells = await row.locator('td').all();
+    const cells = await row.locator("td").all();
     for (const cell of cells) {
       const text = await cell.textContent();
-      if (text?.toLowerCase().includes('expense') || text?.toLowerCase().includes('income')) {
-        return text.toLowerCase().includes('expense') ? 'expense' : 'income';
+      if (text?.toLowerCase().includes("expense") || text?.toLowerCase().includes("income")) {
+        return text.toLowerCase().includes("expense") ? "expense" : "income";
       }
     }
     return null;
   }
 
   async waitForTableUpdate() {
-    await this.transactionsTable.waitFor({ state: 'visible' });
+    await this.transactionsTable.waitFor({ state: "visible" });
     // Optionally, assert a row appears rather than using networkidle
     // Caller can compare counts before/after to ensure update happened.
   }
@@ -197,21 +197,21 @@ export class TransactionsPage {
   async getTransactionAmountAsNumber(description: string): Promise<number | null> {
     const amountText = await this.getTransactionAmount(description);
     if (!amountText) return null;
-    return parseFloat(amountText.replace(/[^0-9.-]/g, ''));
+    return parseFloat(amountText.replace(/[^0-9.-]/g, ""));
   }
 
-  async getAllTransactions(): Promise<Array<{ description: string; amount: string; type: string }>> {
+  async getAllTransactions(): Promise<{ description: string; amount: string; type: string }[]> {
     const rows = await this.getTransactionRows();
     const count = await rows.count();
     const transactions = [];
 
     for (let i = 0; i < count; i++) {
       const row = rows.nth(i);
-      const cells = await row.locator('td').all();
+      const cells = await row.locator("td").all();
       if (cells.length > 0) {
-        const description = await cells[0]?.textContent() || '';
-        const amount = await cells[1]?.textContent() || '';
-        const type = await cells[2]?.textContent() || '';
+        const description = (await cells[0]?.textContent()) || "";
+        const amount = (await cells[1]?.textContent()) || "";
+        const type = (await cells[2]?.textContent()) || "";
         transactions.push({ description: description.trim(), amount: amount.trim(), type: type.trim() });
       }
     }
@@ -222,18 +222,18 @@ export class TransactionsPage {
   async deleteTransaction(description: string) {
     const row = await this.findTransactionByDescription(description);
     if (!row) throw new Error(`Transaction with description "${description}" not found`);
-    
-    const deleteButton = row.getByRole('button', { name: /delete/i });
+
+    const deleteButton = row.getByRole("button", { name: /delete/i });
     await deleteButton.click();
   }
 
   async editTransaction(description: string) {
     const row = await this.findTransactionByDescription(description);
     if (!row) throw new Error(`Transaction with description "${description}" not found`);
-    
-    const editButton = row.getByRole('button', { name: /edit/i });
+
+    const editButton = row.getByRole("button", { name: /edit/i });
     await editButton.click();
-    await this.modal.waitFor({ state: 'visible' });
+    await this.modal.waitFor({ state: "visible" });
   }
 
   async isTableEmpty(): Promise<boolean> {

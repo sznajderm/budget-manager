@@ -25,8 +25,7 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
       </div>
       <h3 className="text-lg font-semibold mb-2">No transactions yet</h3>
       <p className="text-muted-foreground mb-4 max-w-sm">
-        Get started by adding your first transaction to track your income and
-        expenses.
+        Get started by adding your first transaction to track your income and expenses.
       </p>
       <Button onClick={onAdd}>Add Transaction</Button>
     </div>

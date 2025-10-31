@@ -1,16 +1,16 @@
-import { defineMiddleware } from 'astro:middleware';
-import { createSupabaseServerInstance } from '../lib/supabase.server';
-import { getUserFromRequest } from '../lib/auth/session.server';
+import { defineMiddleware } from "astro:middleware";
+import { createSupabaseServerInstance } from "../lib/supabase.server";
+import { getUserFromRequest } from "../lib/auth/session.server";
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = [
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/auth/callback',
-  '/api/auth/login',
-  '/api/auth/signup',
-  '/api/auth/recover',
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/auth/callback",
+  "/api/auth/login",
+  "/api/auth/signup",
+  "/api/auth/recover",
 ];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
@@ -31,19 +31,17 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
   }
 
   // Check if current path is public
-  const isPublicPath = PUBLIC_PATHS.some(path => url.pathname.startsWith(path));
+  const isPublicPath = PUBLIC_PATHS.some((path) => url.pathname.startsWith(path));
 
   // Redirect unauthenticated users to login for protected routes
   if (!user && !isPublicPath) {
-    return redirect('/login');
+    return redirect("/login");
   }
 
   // Redirect authenticated users away from auth pages
-  if (user && (url.pathname === '/login' || url.pathname === '/signup')) {
-    return redirect('/dashboard');
+  if (user && (url.pathname === "/login" || url.pathname === "/signup")) {
+    return redirect("/dashboard");
   }
 
   return next();
 });
-
-

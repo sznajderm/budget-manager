@@ -1,11 +1,4 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TransactionRow } from "./TransactionRow";
 import { EmptyState } from "./EmptyState";
@@ -50,13 +43,7 @@ function SkeletonRow() {
   );
 }
 
-export function TransactionsTable({
-  items,
-  loading,
-  onEdit,
-  onDelete,
-  onAdd,
-}: TransactionsTableProps) {
+export function TransactionsTable({ items, loading, onEdit, onDelete, onAdd }: TransactionsTableProps) {
   // Show empty state if not loading and no items
   if (!loading && items.length === 0) {
     return <EmptyState onAdd={onAdd} />;
@@ -88,14 +75,7 @@ export function TransactionsTable({
             </>
           ) : (
             // Show actual transaction rows
-            items.map((item) => (
-              <TransactionRow
-                key={item.id}
-                item={item}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))
+            items.map((item) => <TransactionRow key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} />)
           )}
         </TableBody>
       </Table>

@@ -1,38 +1,35 @@
-import { defineConfig, devices } from '@playwright/test';
-import { config as loadEnv } from 'dotenv';
+import { defineConfig, devices } from "@playwright/test";
+import { config as loadEnv } from "dotenv";
 
 // Load test environment variables from .env.test for the entire Playwright process
-loadEnv({ path: '.env.test' });
+loadEnv({ path: ".env.test" });
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['html'],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
-  ],
-  globalSetup: './e2e/global-setup.ts',
-  globalTeardown: './e2e/global-teardown.ts',
+  reporter: [["html"], ["junit", { outputFile: "test-results/junit.xml" }]],
+  globalSetup: "./e2e/global-setup.ts",
+  globalTeardown: "./e2e/global-teardown.ts",
   use: {
-    baseURL: 'http://localhost:3010',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    baseURL: "http://localhost:3010",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
 
   webServer: {
     // Build with test mode so Vite/Astro load .env.test (and .env.test.local) instead of default/local envs
-    command: 'npm run build -- --mode test && npm run preview -- --port=3010',
-    url: 'http://localhost:3010',
+    command: "npm run build -- --mode test && npm run preview -- --port=3010",
+    url: "http://localhost:3010",
     reuseExistingServer: !process.env.CI,
     // Ensure the preview server inherits the same env (for any runtime reads)
     env: process.env as Record<string, string>,

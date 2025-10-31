@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TransactionForm } from "./TransactionForm";
 import { dollarsToCents } from "@/lib/utils/currency";
 import { uiDateToISO } from "@/lib/utils/datetime";
@@ -28,10 +22,7 @@ interface AddEditTransactionModalProps {
   submitting: boolean;
   onClose: () => void;
   onSubmitCreate: (payload: TransactionCreatePayload) => Promise<void>;
-  onSubmitUpdate: (
-    id: string,
-    payload: TransactionUpdatePayload
-  ) => Promise<void>;
+  onSubmitUpdate: (id: string, payload: TransactionUpdatePayload) => Promise<void>;
   editingId?: string;
 }
 
@@ -80,13 +71,9 @@ export function AddEditTransactionModal({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "create" ? "Add Transaction" : "Edit Transaction"}
-          </DialogTitle>
+          <DialogTitle>{mode === "create" ? "Add Transaction" : "Edit Transaction"}</DialogTitle>
           <DialogDescription>
-            {mode === "create"
-              ? "Enter the details of your transaction."
-              : "Update the transaction details."}
+            {mode === "create" ? "Enter the details of your transaction." : "Update the transaction details."}
           </DialogDescription>
         </DialogHeader>
 

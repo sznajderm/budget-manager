@@ -211,7 +211,11 @@ export async function listTransactions(
         created_at,
         updated_at,
         accounts!inner(name),
-        categories(name)
+        categories(name),
+        ai_suggestions!left(
+          suggested_category_id,
+          categories!ai_suggestions_suggested_category_id_fkey(name)
+        )
       `
       )
       .eq("user_id", userId)
@@ -241,6 +245,9 @@ export async function listTransactions(
         ? {
             name: transaction.categories.name,
           }
+        : null,
+      ai_suggestions: transaction.ai_suggestions?.categories?.name
+        ? { categories: { name: transaction.ai_suggestions.categories.name } }
         : null,
     }));
 

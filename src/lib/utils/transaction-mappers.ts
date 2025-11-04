@@ -17,6 +17,7 @@ export function mapTransactionToVM(dto: TransactionDTO, uncategorizedLabel = "Un
     accountId: dto.account_id,
     categoryName: dto.categories?.name || uncategorizedLabel,
     categoryId: dto.category_id,
+    aiSuggestedCategoryName: dto.ai_suggestions?.categories.name || null,
     type: dto.transaction_type,
     amountCents: dto.amount_cents,
     amountFormatted: formatCentsAsUSD(dto.amount_cents),

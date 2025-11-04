@@ -16,6 +16,7 @@ export function TransactionRow({ item, onEdit, onDelete }: TransactionRowProps) 
       <TableCell>{item.description || "—"}</TableCell>
       <TableCell>{item.accountName}</TableCell>
       <TableCell>{item.categoryName}</TableCell>
+      <TableCell>{item.aiSuggestedCategoryName || ""}</TableCell>
       <TableCell className="capitalize">{item.type}</TableCell>
       <TableCell className={`text-right font-medium ${item.amountClassName}`}>{item.amountFormatted}</TableCell>
       <TableCell className="text-right">

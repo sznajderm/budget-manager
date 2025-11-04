@@ -28,6 +28,9 @@ function SkeletonRow() {
         <Skeleton className="h-4 w-24" />
       </TableCell>
       <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
         <Skeleton className="h-4 w-20" />
       </TableCell>
       <TableCell className="text-right">
@@ -58,6 +61,7 @@ export function TransactionsTable({ items, loading, onEdit, onDelete, onAdd }: T
             <TableHead>Description</TableHead>
             <TableHead>Account</TableHead>
             <TableHead>Category</TableHead>
+            <TableHead>AI Suggestion</TableHead>
             <TableHead>Type</TableHead>
             <TableHead className="text-right">Amount</TableHead>
             <TableHead className="text-right">Actions</TableHead>

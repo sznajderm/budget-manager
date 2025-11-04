@@ -61,6 +61,10 @@ export type TransactionDTO = Omit<Tables<"transactions">, "user_id"> & {
   accounts: AccountNameRef;
   /** Embedded related category (can be null when category deleted) */
   categories: CategoryNameRef | null;
+  /** Embedded AI suggestion for category (if exists) */
+  ai_suggestions?: {
+    categories: CategoryNameRef;
+  } | null;
 };
 
 export type TransactionCreateCommand = Pick<

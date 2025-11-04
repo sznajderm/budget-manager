@@ -32,6 +32,7 @@ export interface TransactionVM {
   accountId: UUID;
   categoryName: string; // "Uncategorized" if null
   categoryId: UUID | null;
+  aiSuggestedCategoryName: string | null; // AI suggested category name, null if no suggestion
   type: "income" | "expense";
   amountCents: number;
   amountFormatted: string; // e.g., $1,234.56

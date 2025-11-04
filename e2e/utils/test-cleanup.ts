@@ -38,7 +38,7 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
     throw new Error(`Failed to find user: ${findUserError.message}`);
   }
 
-  if (!user) {  
+  if (!user) {
     throw new Error(`User not found: ${TARGET_USER_ID}`);
   }
 

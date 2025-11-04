@@ -3,7 +3,8 @@ import { config as loadEnv } from "dotenv";
 import { cleanupTestUsers } from "./utils/test-cleanup";
 
 // Load environment variables
-loadEnv({ path: ".env.test" });
+loadEnv({ path: ".env" });
+// loadEnv({ path: ".env.test" });
 
 /**
  * Manual cleanup test - run with:

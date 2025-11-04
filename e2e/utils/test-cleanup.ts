@@ -32,11 +32,7 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
   }
 
   // verify if user exists in Supabase Auth users table
-  const { data: user, error: findUserError } = await supabase
-    .from("auth.users")
-    .select("id")
-    .eq("id", TARGET_USER_ID)
-    .single();
+  const { data: user, error: findUserError } = await supabase.auth.admin.getUserById(TARGET_USER_ID);
 
   if (findUserError) {
     throw new Error(`Failed to find user: ${findUserError.message}`);
@@ -93,7 +89,7 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
     }
 
     result.deletedTransactions = count ?? 0;
-    console.log(`✓ Deleted ${result.deletedTransactions} transaction(s) for user ${TARGET_USER_EMAIL}`);
+    console.log(`✓ Deleted ${result.deletedTransactions} transaction(s)`);
   } catch (error) {
     result.errors.push(`Cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
   }

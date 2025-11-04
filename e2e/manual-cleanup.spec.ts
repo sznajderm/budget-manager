@@ -3,7 +3,8 @@ import { config as loadEnv } from "dotenv";
 import { cleanupTestUsers } from "./utils/test-cleanup";
 
 // Load environment variables
-loadEnv({ path: ".env.test" });
+loadEnv({ path: ".env" });
+// loadEnv({ path: ".env.test" });
 
 /**
  * Manual cleanup test - run with:
@@ -19,7 +20,7 @@ test.describe("Manual Cleanup", () => {
     const result = await cleanupTestUsers();
 
     console.log(`\nCleanup Results:`);
-    console.log(`- Deleted users: ${result.deletedUsers}`);
+    console.log(`- Deleted transactions: ${result.deletedTransactions}`);
 
     if (result.errors.length > 0) {
       console.error(`\nErrors encountered:`);

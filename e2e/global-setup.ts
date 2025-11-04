@@ -2,7 +2,8 @@ import { config as loadEnv } from "dotenv";
 import { cleanupTestUsers } from "./utils/test-cleanup";
 
 // Load environment variables from .env.test
-loadEnv({ path: ".env.test" });
+loadEnv({ path: ".env" });
+// loadEnv({ path: ".env.test" });
 
 /**
  * Global setup runs once before all tests.
@@ -14,8 +15,8 @@ async function globalSetup() {
   try {
     const result = await cleanupTestUsers();
 
-    if (result.deletedUsers > 0) {
-      console.log(`✓ Cleaned up ${result.deletedUsers} test user(s)`);
+    if (result.deletedTransactions > 0) {
+      console.log(`✓ Cleaned up ${result.deletedTransactions} test transactions(s)`);
     } else {
       console.log("✓ No test users to clean up");
     }

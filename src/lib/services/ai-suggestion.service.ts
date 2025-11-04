@@ -1,11 +1,6 @@
 import { z } from "zod";
 import type { SupabaseClient } from "../../db/supabase.client";
-import type {
-  TransactionForSuggestion,
-  AICategorySuggestion,
-  CategoryDTO,
-  ResponseFormat,
-} from "../../types";
+import type { TransactionForSuggestion, AICategorySuggestion, CategoryDTO, ResponseFormat } from "../../types";
 import { initOpenRouterService } from "./openrouter.init";
 import { listCategories } from "./category.service";
 
@@ -95,13 +90,13 @@ export async function generateCategorySuggestion(
 
     // Step 5: Call OpenRouter API
     const openRouterService = initOpenRouterService();
-    
+
     console.log("Calling OpenRouter API for category suggestion", {
       transactionId: transaction.id,
       categoriesCount: categories.length,
       model: import.meta.env.OPENROUTER_DEFAULT_MODEL || "default",
     });
-    
+
     const aiResponse = await openRouterService.chat({
       messages: [
         { role: "system", content: systemPrompt },
@@ -129,9 +124,7 @@ export async function generateCategorySuggestion(
     }
 
     // Step 7: Validate suggested category exists in user's categories
-    const suggestedCategory = categories.find(
-      (cat) => cat.id === parsedSuggestion.suggested_category_id
-    );
+    const suggestedCategory = categories.find((cat) => cat.id === parsedSuggestion.suggested_category_id);
 
     if (!suggestedCategory) {
       console.error("AI suggested non-existent category", {

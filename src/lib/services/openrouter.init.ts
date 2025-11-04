@@ -14,8 +14,7 @@ export function initOpenRouterService(): OpenRouterService {
     throw new Error("OPENROUTER_API_KEY environment variable is required");
   }
 
-  const defaultModel =
-    import.meta.env.OPENROUTER_DEFAULT_MODEL || "openai/gpt-4o-mini";
+  const defaultModel = import.meta.env.OPENROUTER_DEFAULT_MODEL || "openai/gpt-4o-mini";
 
   const baseUrl = import.meta.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
 

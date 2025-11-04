@@ -78,12 +78,11 @@ export async function createTransaction(
   userId: string,
   transactionData: ValidatedTransactionCreateCommand
 ): Promise<TransactionCreateResponse> {
-  // Validate input data
-  const validatedData = TransactionCreateSchema.parse(transactionData);
-
   try {
+    // Validate input data
+    const validatedData = TransactionCreateSchema.parse(transactionData);
     // Insert transaction into database
-    const { data, error } = await supabase
+    const { data: insertData, error } = await supabase
       .from("transactions")
       .insert({
         amount_cents: validatedData.amount_cents,
@@ -121,29 +120,29 @@ export async function createTransaction(
       throw new Error("Failed to create transaction due to database error");
     }
 
-    if (!data) {
+    if (!insertData) {
       throw new Error("Transaction creation failed - no data returned");
     }
 
     // Return transaction response (excludes user_id)
     return {
-      id: data.id,
-      amount_cents: data.amount_cents,
-      transaction_type: data.transaction_type as TransactionType,
-      description: data.description,
-      transaction_date: data.transaction_date,
-      account_id: data.account_id,
-      category_id: data.category_id,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
+      id: insertData.id,
+      amount_cents: insertData.amount_cents,
+      transaction_type: insertData.transaction_type as TransactionType,
+      description: insertData.description,
+      transaction_date: insertData.transaction_date,
+      account_id: insertData.account_id,
+      category_id: insertData.category_id,
+      created_at: insertData.created_at,
+      updated_at: insertData.updated_at,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(`Validation error: ${error.errors.map((e) => e.message).join(", ")}`);
     }
 
-    // Re-throw our custom errors
-    if (error instanceof Error) {
+    // Re-throw our custom errors (those we explicitly throw)
+    if (error instanceof Error && (error.message.includes("Account not found") || error.message.includes("Category not found") || error.message.includes("Invalid") || error.message.includes("Transaction") || error.message.includes("violates") || error.message.includes("Failed"))) {
       throw error;
     }
 
@@ -173,10 +172,9 @@ export async function listTransactions(
   userId: string,
   queryParams: ValidatedTransactionListQuery
 ): Promise<TransactionListResult> {
-  // Validate input parameters
-  const validatedParams = TransactionListQuerySchema.parse(queryParams);
-
   try {
+    // Validate input parameters
+    const validatedParams = TransactionListQuerySchema.parse(queryParams);
     // Get total count for pagination metadata
     const { count, error: countError } = await supabase
       .from("transactions")
@@ -245,8 +243,8 @@ export async function listTransactions(
       throw new Error(`Validation error: ${error.errors.map((e) => e.message).join(", ")}`);
     }
 
-    // Re-throw our custom errors
-    if (error instanceof Error) {
+    // Re-throw our custom errors (those we explicitly throw)
+    if (error instanceof Error && (error.message.includes("Failed") || error.message.includes("An unexpected"))) {
       throw error;
     }
 
@@ -270,11 +268,10 @@ export async function updateTransaction(
   transactionId: string,
   updateData: ValidatedTransactionUpdateCommand
 ): Promise<TransactionDTO> {
-  // Validate input data
-  const validatedData = TransactionUpdateSchema.parse(updateData);
-  const validatedId = TransactionIdSchema.parse(transactionId);
-
   try {
+    // Validate input data
+    const validatedData = TransactionUpdateSchema.parse(updateData);
+    const validatedId = TransactionIdSchema.parse(transactionId);
     // First verify transaction exists and belongs to user
     const { data: existingTransaction, error: fetchError } = await supabase
       .from("transactions")
@@ -397,8 +394,8 @@ export async function updateTransaction(
       throw new Error(`Validation error: ${error.errors.map((e) => e.message).join(", ")}`);
     }
 
-    // Re-throw our custom errors
-    if (error instanceof Error) {
+    // Re-throw our custom errors (those we explicitly throw)
+    if (error instanceof Error && (error.message.includes("Transaction not found") || error.message.includes("Category not found") || error.message.includes("Invalid") || error.message.includes("violates") || error.message.includes("Failed"))) {
       throw error;
     }
 
@@ -420,10 +417,9 @@ export async function deleteTransaction(
   userId: string,
   transactionId: string
 ): Promise<void> {
-  // Validate transaction ID format
-  const validatedId = TransactionIdSchema.parse(transactionId);
-
   try {
+    // Validate transaction ID format
+    const validatedId = TransactionIdSchema.parse(transactionId);
     // First verify transaction exists and belongs to user
     const { data: existingTransaction, error: fetchError } = await supabase
       .from("transactions")
@@ -454,8 +450,8 @@ export async function deleteTransaction(
       throw new Error(`Validation error: ${error.errors.map((e) => e.message).join(", ")}`);
     }
 
-    // Re-throw our custom errors
-    if (error instanceof Error) {
+    // Re-throw our custom errors (those we explicitly throw)
+    if (error instanceof Error && (error.message.includes("Transaction not found") || error.message.includes("Failed"))) {
       throw error;
     }
 

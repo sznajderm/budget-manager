@@ -19,7 +19,7 @@ test.describe("Manual Cleanup", () => {
     const result = await cleanupTestUsers();
 
     console.log(`\nCleanup Results:`);
-    console.log(`- Deleted users: ${result.deletedUsers}`);
+    console.log(`- Deleted transactions: ${result.deletedTransactions}`);
 
     if (result.errors.length > 0) {
       console.error(`\nErrors encountered:`);

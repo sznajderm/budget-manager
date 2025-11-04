@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 interface CleanupResult {
-  deletedUsers: number; // kept for backward compatibility with existing callers
+  deletedTransactions: number; // kept for backward compatibility with existing callers
   errors: string[];
 }
 
@@ -31,8 +31,23 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
     throw new Error("Missing required environment variable: E2E_USERNAME_ID");
   }
 
+  // verify if user exists in Supabase Auth users table
+  const { data: user, error: findUserError } = await supabase
+    .from("auth.users")
+    .select("id")
+    .eq("id", TARGET_USER_ID)
+    .single();
+
+  if (findUserError) {
+    throw new Error(`Failed to find user: ${findUserError.message}`);
+  }
+
+  if (!user) {  
+    throw new Error(`User not found: ${TARGET_USER_ID}`);
+  }
+
   const result: CleanupResult = {
-    deletedUsers: 0, // represents number of deleted transactions
+    deletedTransactions: 0, // represents number of deleted transactions
     errors: [],
   };
 
@@ -77,8 +92,8 @@ export async function cleanupTestUsers(): Promise<CleanupResult> {
       return result;
     }
 
-    result.deletedUsers = count ?? 0;
-    console.log(`✓ Deleted ${result.deletedUsers} transaction(s) for user ${TARGET_USER_ID}`);
+    result.deletedTransactions = count ?? 0;
+    console.log(`✓ Deleted ${result.deletedTransactions} transaction(s) for user ${TARGET_USER_EMAIL}`);
   } catch (error) {
     result.errors.push(`Cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -95,7 +110,7 @@ export async function runCleanup() {
   const result = await cleanupTestUsers();
 
   console.log(`\nCleanup complete:`);
-  console.log(`- Deleted transactions: ${result.deletedUsers}`);
+  console.log(`- Deleted transactions: ${result.deletedTransactions}`);
 
   if (result.errors.length > 0) {
     console.error(`\nErrors encountered:`);

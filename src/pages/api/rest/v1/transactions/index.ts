@@ -12,6 +12,7 @@ import {
 } from "../../../../../lib/services/transaction.service";
 import type { TransactionListResponse } from "../../../../../types";
 import { parseTransactionIdFromQuery } from "../../../../../lib/utils/postgrest-parser";
+import { generateCategorySuggestion } from "../../../../../lib/services/ai-suggestion.service";
 
 export const prerender = false;
 
@@ -112,6 +113,27 @@ export const POST: APIRoute = async (context) => {
     try {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
+      // Trigger AI suggestion generation asynchronously (fire-and-forget)
+      // This runs in the background and does not block the response
+      generateCategorySuggestion(
+        supabase,
+        {
+          id: newTransaction.id,
+          description: newTransaction.description,
+          amount_cents: newTransaction.amount_cents,
+          transaction_type: newTransaction.transaction_type,
+        },
+        user.id
+      ).catch((error) => {
+        // Log errors but don't propagate them
+        console.error("Background AI suggestion generation failed:", {
+          transactionId: newTransaction.id,
+          userId: user.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
+
+      // Return transaction response immediately (don't await AI suggestion)
       return new Response(JSON.stringify(newTransaction), {
         status: 201,
         headers: { "Content-Type": "application/json" },

@@ -40,6 +40,11 @@ export class OpenRouterClient {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
+        console.error("OpenRouter API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorBody: JSON.stringify(errorBody, null, 2),
+        });
         throw createErrorFromResponse(response.status, errorBody);
       }
 

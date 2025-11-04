@@ -106,6 +106,21 @@ export interface HandleAISuggestionCommand {
   approved: boolean;
 }
 
+/** Internal type for AI suggestion generation */
+export interface TransactionForSuggestion {
+  id: string;
+  description: string;
+  amount_cents: number;
+  transaction_type: TransactionType;
+}
+
+/** Parsed AI response structure */
+export interface AICategorySuggestion {
+  suggested_category_id: string;
+  confidence_score: number;
+  reasoning: string;
+}
+
 /** Dashboard summaries */
 export interface SummaryCommand {
   start_date: string; // ISO timestamp

@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { z } from "zod";
 import type { SupabaseClient } from "../../db/supabase.client";
 import {
   createTransaction,
@@ -132,7 +131,7 @@ describe("Transaction Service - Validation Schemas", () => {
         description: "  Coffee  ",
       });
       expect(result.success).toBe(true);
-      expect((result.data as any).description).toBe("Coffee");
+      expect(result.data.description).toBe("Coffee");
     });
 
     it("should reject invalid ISO 8601 datetime", () => {
@@ -170,7 +169,7 @@ describe("Transaction Service - Validation Schemas", () => {
     });
 
     it("should accept undefined category_id", () => {
-      const { category_id, ...dataWithoutCategory } = validTransactionData;
+      const dataWithoutCategory = { ...validTransactionData, category_id: undefined };
       const result = TransactionCreateSchema.safeParse(dataWithoutCategory);
       expect(result.success).toBe(true);
     });
@@ -239,20 +238,20 @@ describe("Transaction Service - Validation Schemas", () => {
         offset: 0,
       });
       expect(result.success).toBe(true);
-      expect((result.data as any).limit).toBe(20);
-      expect((result.data as any).offset).toBe(0);
+      expect(result.data.limit).toBe(20);
+      expect(result.data.offset).toBe(0);
     });
 
     it("should use default limit of 20", () => {
       const result = TransactionListQuerySchema.safeParse({});
       expect(result.success).toBe(true);
-      expect((result.data as any).limit).toBe(20);
+      expect(result.data.limit).toBe(20);
     });
 
     it("should use default offset of 0", () => {
       const result = TransactionListQuerySchema.safeParse({});
       expect(result.success).toBe(true);
-      expect((result.data as any).offset).toBe(0);
+      expect(result.data.offset).toBe(0);
     });
 
     it("should coerce string limit to number", () => {
@@ -261,7 +260,7 @@ describe("Transaction Service - Validation Schemas", () => {
         offset: 0,
       });
       expect(result.success).toBe(true);
-      expect((result.data as any).limit).toBe(10);
+      expect(result.data.limit).toBe(10);
     });
 
     it("should reject limit > 50", () => {
@@ -278,7 +277,7 @@ describe("Transaction Service - Validation Schemas", () => {
         offset: 0,
       });
       expect(result.success).toBe(true);
-      expect((result.data as any).limit).toBe(50);
+      expect(result.data.limit).toBe(50);
     });
 
     it("should reject limit < 1", () => {
@@ -356,13 +355,9 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      const result = await createTransaction(
-        mockSupabase,
-        mockUserId,
-        validTransactionData
-      );
+      const result = await createTransaction(mockSupabase, mockUserId, validTransactionData);
 
       expect(result).toEqual({
         id: mockTransactionId,
@@ -389,13 +384,9 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await createTransaction(
-        mockSupabase,
-        mockUserId,
-        validTransactionData
-      );
+      await createTransaction(mockSupabase, mockUserId, validTransactionData);
 
       expect(mockInsert).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -419,7 +410,7 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
       await createTransaction(mockSupabase, mockUserId, {
         ...validTransactionData,
@@ -448,13 +439,9 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      const result = await createTransaction(
-        mockSupabase,
-        mockUserId,
-        validTransactionData
-      );
+      const result = await createTransaction(mockSupabase, mockUserId, validTransactionData);
 
       expect(result).not.toHaveProperty("user_id");
     });
@@ -467,9 +454,9 @@ describe("createTransaction", () => {
         amount_cents: -1000,
       };
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, invalidData as any)
-      ).rejects.toThrow("Validation error");
+      await expect(createTransaction(mockSupabase, mockUserId, invalidData as never)).rejects.toThrow(
+        "Validation error"
+      );
     });
 
     it("should reject invalid transaction type", async () => {
@@ -478,9 +465,9 @@ describe("createTransaction", () => {
         transaction_type: "transfer",
       };
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, invalidData as any)
-      ).rejects.toThrow("Validation error");
+      await expect(createTransaction(mockSupabase, mockUserId, invalidData as never)).rejects.toThrow(
+        "Validation error"
+      );
     });
 
     it("should reject invalid UUID formats", async () => {
@@ -489,9 +476,9 @@ describe("createTransaction", () => {
         account_id: "not-a-uuid",
       };
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, invalidData as any)
-      ).rejects.toThrow("Validation error");
+      await expect(createTransaction(mockSupabase, mockUserId, invalidData as never)).rejects.toThrow(
+        "Validation error"
+      );
     });
   });
 
@@ -503,7 +490,7 @@ describe("createTransaction", () => {
             data: null,
             error: {
               code: "23503",
-              message: "violates foreign key constraint \"transactions_account_id_fkey\"",
+              message: 'violates foreign key constraint "transactions_account_id_fkey"',
             },
           }),
         }),
@@ -511,11 +498,11 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, validTransactionData)
-      ).rejects.toThrow("Account not found or does not belong to user");
+      await expect(createTransaction(mockSupabase, mockUserId, validTransactionData)).rejects.toThrow(
+        "Account not found or does not belong to user"
+      );
     });
 
     it("should throw specific error for invalid category_id", async () => {
@@ -525,7 +512,7 @@ describe("createTransaction", () => {
             data: null,
             error: {
               code: "23503",
-              message: "violates foreign key constraint \"transactions_category_id_fkey\"",
+              message: 'violates foreign key constraint "transactions_category_id_fkey"',
             },
           }),
         }),
@@ -533,11 +520,11 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, validTransactionData)
-      ).rejects.toThrow("Category not found or does not belong to user");
+      await expect(createTransaction(mockSupabase, mockUserId, validTransactionData)).rejects.toThrow(
+        "Category not found or does not belong to user"
+      );
     });
 
     it("should throw generic error for other foreign key violations", async () => {
@@ -555,11 +542,11 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, validTransactionData)
-      ).rejects.toThrow("Invalid account or category reference");
+      await expect(createTransaction(mockSupabase, mockUserId, validTransactionData)).rejects.toThrow(
+        "Invalid account or category reference"
+      );
     });
   });
 
@@ -579,11 +566,11 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, validTransactionData)
-      ).rejects.toThrow("Transaction data violates database constraints");
+      await expect(createTransaction(mockSupabase, mockUserId, validTransactionData)).rejects.toThrow(
+        "Transaction data violates database constraints"
+      );
     });
   });
 
@@ -603,11 +590,11 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, validTransactionData)
-      ).rejects.toThrow("Failed to create transaction due to database error");
+      await expect(createTransaction(mockSupabase, mockUserId, validTransactionData)).rejects.toThrow(
+        "Failed to create transaction due to database error"
+      );
     });
 
     it("should throw error when no data is returned", async () => {
@@ -622,11 +609,11 @@ describe("createTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         insert: mockInsert,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, validTransactionData)
-      ).rejects.toThrow("Transaction creation failed - no data returned");
+      await expect(createTransaction(mockSupabase, mockUserId, validTransactionData)).rejects.toThrow(
+        "Transaction creation failed - no data returned"
+      );
     });
   });
 
@@ -638,11 +625,11 @@ describe("createTransaction", () => {
             single: vi.fn().mockRejectedValue(new Error("Unexpected error")),
           }),
         }),
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        createTransaction(mockSupabase, mockUserId, validTransactionData)
-      ).rejects.toThrow("An unexpected error occurred while creating the transaction");
+      await expect(createTransaction(mockSupabase, mockUserId, validTransactionData)).rejects.toThrow(
+        "An unexpected error occurred while creating the transaction"
+      );
     });
   });
 });
@@ -678,10 +665,9 @@ describe("listTransactions", () => {
         }),
       });
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
       const result = await listTransactions(mockSupabase, mockUserId, {
         limit: 20,
@@ -725,10 +711,9 @@ describe("listTransactions", () => {
         }),
       });
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
       const result = await listTransactions(mockSupabase, mockUserId, {
         limit: 20,
@@ -768,10 +753,9 @@ describe("listTransactions", () => {
         }),
       });
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
       const result = await listTransactions(mockSupabase, mockUserId, {
         limit: 20,
@@ -805,10 +789,9 @@ describe("listTransactions", () => {
         }),
       });
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
       const result = await listTransactions(mockSupabase, mockUserId, {
         limit: 20,
@@ -839,10 +822,9 @@ describe("listTransactions", () => {
 
       const mockRange = mockSelect().eq().order().range;
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
       await listTransactions(mockSupabase, mockUserId, {
         limit: 10,
@@ -873,10 +855,9 @@ describe("listTransactions", () => {
         }),
       });
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
       await listTransactions(mockSupabase, mockUserId, {
         limit: 20,
@@ -898,11 +879,11 @@ describe("listTransactions", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockCountSelect,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        listTransactions(mockSupabase, mockUserId, { limit: 20, offset: 0 })
-      ).rejects.toThrow("Failed to retrieve transaction count");
+      await expect(listTransactions(mockSupabase, mockUserId, { limit: 20, offset: 0 })).rejects.toThrow(
+        "Failed to retrieve transaction count"
+      );
     });
 
     it("should throw error when data query fails", async () => {
@@ -924,14 +905,13 @@ describe("listTransactions", () => {
         }),
       });
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
-      await expect(
-        listTransactions(mockSupabase, mockUserId, { limit: 20, offset: 0 })
-      ).rejects.toThrow("Failed to retrieve transactions from database");
+      await expect(listTransactions(mockSupabase, mockUserId, { limit: 20, offset: 0 })).rejects.toThrow(
+        "Failed to retrieve transactions from database"
+      );
     });
 
     it("should handle null count gracefully", async () => {
@@ -953,10 +933,9 @@ describe("listTransactions", () => {
         }),
       });
 
-      vi
-        .mocked(mockSupabase.from)
-        .mockReturnValueOnce({ select: mockCountSelect } as any) // count query
-        .mockReturnValueOnce({ select: mockSelect } as any); // data query
+      vi.mocked(mockSupabase.from)
+        .mockReturnValueOnce({ select: mockCountSelect } as unknown as ReturnType<SupabaseClient["from"]>) // count query
+        .mockReturnValueOnce({ select: mockSelect } as unknown as ReturnType<SupabaseClient["from"]>); // data query
 
       const result = await listTransactions(mockSupabase, mockUserId, {
         limit: 20,
@@ -969,9 +948,7 @@ describe("listTransactions", () => {
 
   describe("Validation", () => {
     it("should reject invalid limit", async () => {
-      await expect(
-        listTransactions(mockSupabase, mockUserId, { limit: 51, offset: 0 } as any)
-      ).rejects.toThrow();
+      await expect(listTransactions(mockSupabase, mockUserId, { limit: 51, offset: 0 } as never)).rejects.toThrow();
     });
 
     it("should reject negative offset", async () => {
@@ -979,7 +956,7 @@ describe("listTransactions", () => {
         listTransactions(mockSupabase, mockUserId, {
           limit: 20,
           offset: -1,
-        } as any)
+        } as never)
       ).rejects.toThrow();
     });
   });
@@ -1027,17 +1004,12 @@ describe("updateTransaction", () => {
           return {
             select: mockSelect,
             update: mockUpdate,
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
-        return {} as any;
+        return {} as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
-      const result = await updateTransaction(
-        mockSupabase,
-        mockUserId,
-        mockTransactionId,
-        { amount_cents: 6000 }
-      );
+      const result = await updateTransaction(mockSupabase, mockUserId, mockTransactionId, { amount_cents: 6000 });
 
       expect(result).toMatchObject({
         id: mockTransactionId,
@@ -1073,14 +1045,9 @@ describe("updateTransaction", () => {
       vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
         update: mockUpdate,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await updateTransaction(
-        mockSupabase,
-        mockUserId,
-        mockTransactionId,
-        { amount_cents: 6000 }
-      );
+      await updateTransaction(mockSupabase, mockUserId, mockTransactionId, { amount_cents: 6000 });
 
       // Verify that select was called with correct query for transaction ownership
       expect(mockSelect).toHaveBeenCalled();
@@ -1126,20 +1093,15 @@ describe("updateTransaction", () => {
         if (table === "categories") {
           return {
             select: mockCategorySelect,
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
         return {
           select: mockTransactionSelect,
           update: mockUpdate,
-        } as any;
+        } as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
-      await updateTransaction(
-        mockSupabase,
-        mockUserId,
-        mockTransactionId,
-        { category_id: mockCategoryId }
-      );
+      await updateTransaction(mockSupabase, mockUserId, mockTransactionId, { category_id: mockCategoryId });
 
       expect(mockCategorySelect).toHaveBeenCalled();
     });
@@ -1171,20 +1133,15 @@ describe("updateTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
         if (table === "categories") {
-          return {} as any;
+          return {} as unknown as ReturnType<SupabaseClient["from"]>;
         }
         return {
           select: mockTransactionSelect,
           update: mockUpdate,
-        } as any;
+        } as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
-      const result = await updateTransaction(
-        mockSupabase,
-        mockUserId,
-        mockTransactionId,
-        { category_id: null }
-      );
+      const result = await updateTransaction(mockSupabase, mockUserId, mockTransactionId, { category_id: null });
 
       expect(result.categories).toBeNull();
     });
@@ -1219,20 +1176,15 @@ describe("updateTransaction", () => {
           return {
             select: mockSelect,
             update: mockUpdate,
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
-        return {} as any;
+        return {} as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
-      await updateTransaction(
-        mockSupabase,
-        mockUserId,
-        mockTransactionId,
-        {
-          amount_cents: 7000,
-          description: "Updated",
-        }
-      );
+      await updateTransaction(mockSupabase, mockUserId, mockTransactionId, {
+        amount_cents: 7000,
+        description: "Updated",
+      });
 
       expect(mockUpdate).toHaveBeenCalledWith({
         amount_cents: 7000,
@@ -1256,15 +1208,10 @@ describe("updateTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
       await expect(
-        updateTransaction(
-          mockSupabase,
-          mockUserId,
-          mockTransactionId,
-          { amount_cents: 6000 }
-        )
+        updateTransaction(mockSupabase, mockUserId, mockTransactionId, { amount_cents: 6000 })
       ).rejects.toThrow("Transaction not found or does not belong to user");
     });
 
@@ -1295,21 +1242,16 @@ describe("updateTransaction", () => {
         if (table === "categories") {
           return {
             select: mockCategorySelect,
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
         return {
           select: mockTransactionSelect,
-        } as any;
+        } as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
       const invalidCategoryId = "550e8400-e29b-41d4-a716-446655440099";
       await expect(
-        updateTransaction(
-          mockSupabase,
-          mockUserId,
-          mockTransactionId,
-          { category_id: invalidCategoryId }
-        )
+        updateTransaction(mockSupabase, mockUserId, mockTransactionId, { category_id: invalidCategoryId })
       ).rejects.toThrow("Category not found or does not belong to user");
     });
   });
@@ -1356,21 +1298,16 @@ describe("updateTransaction", () => {
                 }),
               }),
             }),
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
         return {
           select: mockTransactionSelect,
           update: mockUpdate,
-        } as any;
+        } as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
       await expect(
-        updateTransaction(
-          mockSupabase,
-          mockUserId,
-          mockTransactionId,
-          { category_id: mockCategoryId }
-        )
+        updateTransaction(mockSupabase, mockUserId, mockTransactionId, { category_id: mockCategoryId })
       ).rejects.toThrow("Category not found or does not belong to user");
     });
 
@@ -1404,56 +1341,36 @@ describe("updateTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
         if (table === "categories") {
-          return {} as any;
+          return {} as unknown as ReturnType<SupabaseClient["from"]>;
         }
         return {
           select: mockTransactionSelect,
           update: mockUpdate,
-        } as any;
+        } as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
       await expect(
-        updateTransaction(
-          mockSupabase,
-          mockUserId,
-          mockTransactionId,
-          { amount_cents: 6000 }
-        )
+        updateTransaction(mockSupabase, mockUserId, mockTransactionId, { amount_cents: 6000 })
       ).rejects.toThrow("Transaction data violates database constraints");
     });
   });
 
   describe("Validation", () => {
     it("should reject invalid transaction ID", async () => {
-      await expect(
-        updateTransaction(
-          mockSupabase,
-          mockUserId,
-          "not-a-uuid",
-          { amount_cents: 6000 }
-        )
-      ).rejects.toThrow("Validation error");
+      await expect(updateTransaction(mockSupabase, mockUserId, "not-a-uuid", { amount_cents: 6000 })).rejects.toThrow(
+        "Validation error"
+      );
     });
 
     it("should reject empty update object", async () => {
-      await expect(
-        updateTransaction(
-          mockSupabase,
-          mockUserId,
-          mockTransactionId,
-          {}
-        )
-      ).rejects.toThrow("Validation error");
+      await expect(updateTransaction(mockSupabase, mockUserId, mockTransactionId, {})).rejects.toThrow(
+        "Validation error"
+      );
     });
 
     it("should reject negative amount in update", async () => {
       await expect(
-        updateTransaction(
-          mockSupabase,
-          mockUserId,
-          mockTransactionId,
-          { amount_cents: -100 }
-        )
+        updateTransaction(mockSupabase, mockUserId, mockTransactionId, { amount_cents: -100 })
       ).rejects.toThrow("Validation error");
     });
   });
@@ -1494,9 +1411,9 @@ describe("deleteTransaction", () => {
           return {
             select: mockSelect,
             delete: mockDelete,
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
-        return {} as any;
+        return {} as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
       await deleteTransaction(mockSupabase, mockUserId, mockTransactionId);
@@ -1525,7 +1442,7 @@ describe("deleteTransaction", () => {
       vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
         delete: mockDelete,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
       await deleteTransaction(mockSupabase, mockUserId, mockTransactionId);
 
@@ -1548,11 +1465,11 @@ describe("deleteTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        deleteTransaction(mockSupabase, mockUserId, mockTransactionId)
-      ).rejects.toThrow("Transaction not found or does not belong to user");
+      await expect(deleteTransaction(mockSupabase, mockUserId, mockTransactionId)).rejects.toThrow(
+        "Transaction not found or does not belong to user"
+      );
     });
 
     it("should reject deletion if transaction belongs to different user", async () => {
@@ -1569,11 +1486,11 @@ describe("deleteTransaction", () => {
 
       vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
-      } as any);
+      } as unknown as ReturnType<SupabaseClient["from"]>);
 
-      await expect(
-        deleteTransaction(mockSupabase, mockUserId, mockTransactionId)
-      ).rejects.toThrow("Transaction not found or does not belong to user");
+      await expect(deleteTransaction(mockSupabase, mockUserId, mockTransactionId)).rejects.toThrow(
+        "Transaction not found or does not belong to user"
+      );
     });
   });
 
@@ -1603,22 +1520,20 @@ describe("deleteTransaction", () => {
           return {
             select: mockSelect,
             delete: mockDelete,
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
-        return {} as any;
+        return {} as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
-      await expect(
-        deleteTransaction(mockSupabase, mockUserId, mockTransactionId)
-      ).rejects.toThrow("Failed to delete transaction due to database error");
+      await expect(deleteTransaction(mockSupabase, mockUserId, mockTransactionId)).rejects.toThrow(
+        "Failed to delete transaction due to database error"
+      );
     });
   });
 
   describe("Validation", () => {
     it("should reject invalid transaction ID", async () => {
-      await expect(
-        deleteTransaction(mockSupabase, mockUserId, "not-a-uuid")
-      ).rejects.toThrow("Validation error");
+      await expect(deleteTransaction(mockSupabase, mockUserId, "not-a-uuid")).rejects.toThrow("Validation error");
     });
   });
 
@@ -1646,16 +1561,12 @@ describe("deleteTransaction", () => {
           return {
             select: mockSelect,
             delete: mockDelete,
-          } as any;
+          } as unknown as ReturnType<SupabaseClient["from"]>;
         }
-        return {} as any;
+        return {} as unknown as ReturnType<SupabaseClient["from"]>;
       });
 
-      const result = await deleteTransaction(
-        mockSupabase,
-        mockUserId,
-        mockTransactionId
-      );
+      const result = await deleteTransaction(mockSupabase, mockUserId, mockTransactionId);
 
       expect(result).toBeUndefined();
     });

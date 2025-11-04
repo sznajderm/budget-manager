@@ -20,11 +20,13 @@ export const TransactionCreateSchema = z.object({
 export const TransactionUpdateSchema = z
   .object({
     amount_cents: z.number().int().positive("Amount must be a positive integer in cents").optional(),
-    transaction_type: z.enum(["expense", "income"], {
-      errorMap: () => ({
-        message: "Transaction type must be either 'expense' or 'income'",
-      }),
-    }).optional(),
+    transaction_type: z
+      .enum(["expense", "income"], {
+        errorMap: () => ({
+          message: "Transaction type must be either 'expense' or 'income'",
+        }),
+      })
+      .optional(),
     description: z.string().trim().min(1, "Description cannot be empty").optional(),
     transaction_date: z.string().datetime("Invalid ISO 8601 timestamp format").optional(),
     category_id: z.string().uuid("Category ID must be a valid UUID").nullable().optional(),
@@ -142,7 +144,15 @@ export async function createTransaction(
     }
 
     // Re-throw our custom errors (those we explicitly throw)
-    if (error instanceof Error && (error.message.includes("Account not found") || error.message.includes("Category not found") || error.message.includes("Invalid") || error.message.includes("Transaction") || error.message.includes("violates") || error.message.includes("Failed"))) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("Account not found") ||
+        error.message.includes("Category not found") ||
+        error.message.includes("Invalid") ||
+        error.message.includes("Transaction") ||
+        error.message.includes("violates") ||
+        error.message.includes("Failed"))
+    ) {
       throw error;
     }
 
@@ -395,7 +405,14 @@ export async function updateTransaction(
     }
 
     // Re-throw our custom errors (those we explicitly throw)
-    if (error instanceof Error && (error.message.includes("Transaction not found") || error.message.includes("Category not found") || error.message.includes("Invalid") || error.message.includes("violates") || error.message.includes("Failed"))) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("Transaction not found") ||
+        error.message.includes("Category not found") ||
+        error.message.includes("Invalid") ||
+        error.message.includes("violates") ||
+        error.message.includes("Failed"))
+    ) {
       throw error;
     }
 
@@ -451,7 +468,10 @@ export async function deleteTransaction(
     }
 
     // Re-throw our custom errors (those we explicitly throw)
-    if (error instanceof Error && (error.message.includes("Transaction not found") || error.message.includes("Failed"))) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("Transaction not found") || error.message.includes("Failed"))
+    ) {
       throw error;
     }
 

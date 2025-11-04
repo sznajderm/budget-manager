@@ -25,7 +25,5 @@ export default defineConfig({
       external: ["sharp"],
     },
   },
-  adapter: cloudflare({
-    mode: "advanced",
-  }),
+  adapter: cloudflare(),
 });

@@ -20,7 +20,13 @@ export const TransactionCreateSchema = z.object({
 export const TransactionUpdateSchema = z
   .object({
     amount_cents: z.number().int().positive("Amount must be a positive integer in cents").optional(),
+    transaction_type: z.enum(["expense", "income"], {
+      errorMap: () => ({
+        message: "Transaction type must be either 'expense' or 'income'",
+      }),
+    }).optional(),
     description: z.string().trim().min(1, "Description cannot be empty").optional(),
+    transaction_date: z.string().datetime("Invalid ISO 8601 timestamp format").optional(),
     category_id: z.string().uuid("Category ID must be a valid UUID").nullable().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
@@ -76,37 +82,6 @@ export async function createTransaction(
   const validatedData = TransactionCreateSchema.parse(transactionData);
 
   try {
-    // Validate account ownership
-    // const { data: account, error: accountError } = await supabase
-    //   .from("accounts")
-    //   .select("*")
-    //   .eq("id", validatedData.account_id)
-    //   .eq("user_id", userId)
-    //   .limit(1);
-
-    // console.log("userId", userId);
-    // console.log("validatedData.account_id", validatedData.account_id);
-    // console.log("account", account);
-    // console.log("accountError", accountError);
-
-    // if (accountError || !account) {
-    //   throw new Error("Account not found or does not belong to user");
-    // }
-
-    // // Validate category ownership (if category_id is provided)
-    // if (validatedData.category_id) {
-    //   const { data: category, error: categoryError } = await supabase
-    //     .from("categories")
-    //     .select("id")
-    //     .eq("id", validatedData.category_id)
-    //     .eq("user_id", userId)
-    //     .single();
-
-    //   if (categoryError || !category) {
-    //     throw new Error("Category not found or does not belong to user");
-    //   }
-    // }
-
     // Insert transaction into database
     const { data, error } = await supabase
       .from("transactions")
@@ -329,14 +304,22 @@ export async function updateTransaction(
     // Update transaction in database with automatic updated_at timestamp
     const updatePayload: Partial<{
       amount_cents: number;
+      transaction_type: string;
       description: string;
+      transaction_date: string;
       category_id: string | null;
     }> = {};
     if (validatedData.amount_cents !== undefined) {
       updatePayload.amount_cents = validatedData.amount_cents;
     }
+    if (validatedData.transaction_type !== undefined) {
+      updatePayload.transaction_type = validatedData.transaction_type;
+    }
     if (validatedData.description !== undefined) {
       updatePayload.description = validatedData.description;
+    }
+    if (validatedData.transaction_date !== undefined) {
+      updatePayload.transaction_date = validatedData.transaction_date;
     }
     if (validatedData.category_id !== undefined) {
       updatePayload.category_id = validatedData.category_id;

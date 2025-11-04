@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { TransactionDTO, TransactionCreateCommand, TransactionUpdateCommand } from "@/types";
+import { parseUIDate } from "@/lib/utils/datetime";
 
 export type UUID = string;
 
@@ -58,7 +59,10 @@ export const TransactionFormSchema = z.object({
     .regex(amountDollarsRegex, "Enter a valid amount (max 2 decimals)")
     .refine((v) => parseFloat(v) > 0, "Amount must be greater than 0"),
   transaction_type: z.enum(["income", "expense"]),
-  transaction_date_input: z.string().min(1, "Date/time is required"),
+  transaction_date_input: z
+    .string()
+    .min(1, "Date/time is required")
+    .refine((v) => parseUIDate(v) !== null, "Invalid date format. Use DD/MM/YYYY HH:mm"),
   account_id: z.string().uuid("Select an account"),
   category_id: z.string().uuid().nullable().optional(),
   description: z.string().min(1, "Description is required").max(255, "Max 255 characters"),

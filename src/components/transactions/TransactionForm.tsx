@@ -98,8 +98,8 @@ export function TransactionForm({
 
   const updateField = <K extends keyof TransactionFormValues>(field: K, value: TransactionFormValues[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field when user starts typing
-    if (errors[field]) {
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[field]) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [field]: _, ...rest } = validationErrors;
       setValidationErrors(rest);

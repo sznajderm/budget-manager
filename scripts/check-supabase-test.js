@@ -28,7 +28,7 @@ async function main() {
 
   try {
     // Lightweight connectivity check: list 1 transaction row if table exists
-    const { data, error } = await supabase.from("accounts").select("id").limit(1);
+    const { data, error } = await supabase.from("accounts").select("id");
 
     if (error && error.message) {
       throw error;

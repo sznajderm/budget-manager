@@ -5,5 +5,5 @@ main = "dist/_worker.js"
 
 # KV namespace for sessions
 [[kv_namespaces]]
-binding = "SESSION"
+binding = "ASSETS"
 id = "857dec90311f4302a8bcbdad5d8f04df"

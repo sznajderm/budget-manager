@@ -115,10 +115,11 @@ export const POST: APIRoute = async (context) => {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
       // If debug mode is enabled, run suggestion synchronously and return diagnostics
-      const debug = import.meta.env.DEBUG || "false";
-      const debugEnabled = debug === "1" || debug === "true";
+      // const url = new URL(context.request.url);
+      // const debug = url.searchParams.get("debug");
+      // const debugEnabled = debug === "1" || debug === "true";
 
-      if (debugEnabled) {
+      // if (debugEnabled) {
         const { generateCategorySuggestionDebug } = await import("../../../../../lib/services/ai-suggestion.service");
         const debugResult = await generateCategorySuggestionDebug(
           supabase,
@@ -136,7 +137,7 @@ export const POST: APIRoute = async (context) => {
           status: 201,
           headers: { "Content-Type": "application/json" },
         });
-      }
+      // }
 
       // Otherwise, trigger AI suggestion generation asynchronously (fire-and-forget)
       // In Cloudflare Workers production, ensure the task survives the response using waitUntil

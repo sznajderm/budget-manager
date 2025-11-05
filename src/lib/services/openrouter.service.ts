@@ -36,6 +36,15 @@ export class OpenRouterService {
     this.timeout = validated.timeout;
     this.maxRetries = validated.maxRetries;
 
+    console.log("[OpenRouterService] Initializing with config:", {
+      baseUrl: this.baseUrl,
+      defaultModel: this.defaultModel,
+      timeout: this.timeout,
+      maxRetries: this.maxRetries,
+      hasApiKey: !!this.apiKey,
+      apiKeyLength: this.apiKey?.length,
+    });
+
     this.httpClient = new OpenRouterClient(this.apiKey, this.baseUrl, this.timeout);
   }
 
@@ -49,6 +58,13 @@ export class OpenRouterService {
    * @throws OpenRouterError for API errors
    */
   async chat(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
+    console.log("[OpenRouterService] Chat request initiated:", {
+      model: request.model || this.defaultModel,
+      messageCount: request.messages?.length || 0,
+      hasResponseFormat: !!request.response_format,
+      temperature: request.temperature,
+    });
+
     // Validate messages
     if (!request.messages || request.messages.length === 0) {
       throw new OpenRouterValidationError("Messages array cannot be empty", [

@@ -23,8 +23,21 @@ export class OpenRouterClient {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
+    // Log request details (without sensitive data)
+    console.log("[OpenRouter] Initiating request:", {
+      endpoint,
+      baseUrl: this.baseUrl,
+      timeout: this.timeout,
+      hasApiKey: !!this.apiKey,
+      apiKeyLength: this.apiKey?.length,
+      bodyKeys: body && typeof body === "object" ? Object.keys(body) : "not-an-object",
+    });
+
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const url = `${this.baseUrl}${endpoint}`;
+      console.log("[OpenRouter] Fetching URL:", url);
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
@@ -36,11 +49,18 @@ export class OpenRouterClient {
         signal: controller.signal,
       });
 
+      console.log("[OpenRouter] Response received:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+
       clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
-        console.error("OpenRouter API error:", {
+        console.error("[OpenRouter] API error response:", {
           status: response.status,
           statusText: response.statusText,
           errorBody: JSON.stringify(errorBody, null, 2),
@@ -48,17 +68,28 @@ export class OpenRouterClient {
         throw createErrorFromResponse(response.status, errorBody);
       }
 
+      console.log("[OpenRouter] Request successful");
       return await response.json();
     } catch (error) {
       clearTimeout(timeoutId);
 
+      console.error("[OpenRouter] Request failed:", {
+        errorName: error instanceof Error ? error.name : "unknown",
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorType: typeof error,
+        isTypeError: error instanceof TypeError,
+        isAbortError: error instanceof Error && error.name === "AbortError",
+      });
+
       // Handle timeout
       if (error instanceof Error && error.name === "AbortError") {
+        console.error("[OpenRouter] Request timed out after", this.timeout, "ms");
         throw new OpenRouterNetworkError(`Request timeout after ${this.timeout}ms`);
       }
 
       // Handle network errors
       if (error instanceof TypeError) {
+        console.error("[OpenRouter] Network error (TypeError):", error.message);
         throw new OpenRouterNetworkError("Network request failed. Please check your connection.", error);
       }
 

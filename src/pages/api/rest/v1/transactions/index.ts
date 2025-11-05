@@ -114,7 +114,32 @@ export const POST: APIRoute = async (context) => {
     try {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
-      // Trigger AI suggestion generation asynchronously (fire-and-forget)
+      // If debug mode is enabled, run suggestion synchronously and return diagnostics
+      const url = new URL(context.request.url);
+      const debug = url.searchParams.get("debug");
+      const debugEnabled = debug === "1" || debug === "true";
+
+      if (debugEnabled) {
+        const { generateCategorySuggestionDebug } = await import("../../../../../lib/services/ai-suggestion.service");
+        const debugResult = await generateCategorySuggestionDebug(
+          supabase,
+          {
+            id: newTransaction.id,
+            description: newTransaction.description,
+            amount_cents: newTransaction.amount_cents,
+            transaction_type: newTransaction.transaction_type,
+          },
+          user.id,
+          { performInsert: true }
+        );
+
+        return new Response(JSON.stringify({ transaction: newTransaction, debug: debugResult }), {
+          status: 201,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      // Otherwise, trigger AI suggestion generation asynchronously (fire-and-forget)
       // This runs in the background and does not block the response
       generateCategorySuggestion(
         supabase,

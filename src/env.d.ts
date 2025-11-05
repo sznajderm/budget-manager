@@ -3,14 +3,12 @@
 import type { SupabaseClient as SupabaseClientPkg } from "@supabase/supabase-js";
 import type { Database } from "./db/database.types";
 import type { User } from "./lib/auth/session.server";
-import type { Runtime } from "@astrojs/cloudflare";
 
 declare global {
   namespace App {
     interface Locals {
       supabase: SupabaseClientPkg<Database>;
       user?: User;
-      runtime: Runtime<unknown>;
     }
   }
 }

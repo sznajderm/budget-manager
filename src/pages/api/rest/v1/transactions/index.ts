@@ -162,9 +162,9 @@ export const POST: APIRoute = async (context) => {
         }
       })();
 
-        if (context.locals?.runtime?.ctx?.waitUntil) {
-          context.locals.runtime.ctx.waitUntil(bgTask);
-        }
+      // Prefer Cloudflare waitUntil when available
+      if (context.locals?.runtime?.waitUntil) {
+        context.locals.runtime.waitUntil(bgTask);
       }
 
       // Return transaction response immediately (don't await AI suggestion)

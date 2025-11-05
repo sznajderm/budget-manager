@@ -115,8 +115,7 @@ export const POST: APIRoute = async (context) => {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
       // If debug mode is enabled, run suggestion synchronously and return diagnostics
-      const url = new URL(context.request.url);
-      const debug = url.searchParams.get("debug");
+      const debug = import.meta.env.DEBUG || "false";
       const debugEnabled = debug === "1" || debug === "true";
 
       if (debugEnabled) {

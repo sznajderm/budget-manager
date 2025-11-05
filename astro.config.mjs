@@ -25,5 +25,10 @@ export default defineConfig({
       external: ["sharp"],
     },
   },
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    workerEntryPoint: {
+      path: "src/worker.ts",
+      namedExports: ["queue"],
+    },
+  }),
 });

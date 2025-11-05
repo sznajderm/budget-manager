@@ -139,28 +139,43 @@ export const POST: APIRoute = async (context) => {
         });
       }
 
-      // Otherwise, trigger AI suggestion generation asynchronously (fire-and-forget)
-      // In Cloudflare Workers production, ensure the task survives the response using waitUntil
-      const bgTask = (async () => {
-        try {
-          await generateCategorySuggestion(
-            supabase,
-            {
-              id: newTransaction.id,
-              description: newTransaction.description,
-              amount_cents: newTransaction.amount_cents,
-              transaction_type: newTransaction.transaction_type,
-            },
-            user.id
-          );
-        } catch (error) {
-          console.error("Background AI suggestion generation failed:", {
-            transactionId: newTransaction.id,
-            userId: user.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      })();
+      // Prefer Cloudflare Queue for background processing; fall back to waitUntil
+      const env = context.locals?.runtime?.env as unknown as {
+        AI_SUGGESTIONS?: { send: (body: string) => Promise<void> };
+      };
+      if (env?.AI_SUGGESTIONS?.send) {
+        const job = {
+          type: "ai-suggestion",
+          userId: user.id,
+          transaction: {
+            id: newTransaction.id,
+            description: newTransaction.description,
+            amount_cents: newTransaction.amount_cents,
+            transaction_type: newTransaction.transaction_type,
+          },
+        };
+        await env.AI_SUGGESTIONS.send(JSON.stringify(job));
+      } else {
+        const bgTask = (async () => {
+          try {
+            await generateCategorySuggestion(
+              supabase,
+              {
+                id: newTransaction.id,
+                description: newTransaction.description,
+                amount_cents: newTransaction.amount_cents,
+                transaction_type: newTransaction.transaction_type,
+              },
+              user.id
+            );
+          } catch (error) {
+            console.error("Background AI suggestion generation failed:", {
+              transactionId: newTransaction.id,
+              userId: user.id,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        })();
 
         if (context.locals?.runtime?.ctx?.waitUntil) {
           context.locals.runtime.ctx.waitUntil(bgTask);

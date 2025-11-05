@@ -9,6 +9,9 @@ declare global {
     interface Locals {
       supabase: SupabaseClientPkg<Database>;
       user?: User;
+      runtime?: {
+        waitUntil: (p: Promise<unknown>) => void;
+      };
     }
   }
 }

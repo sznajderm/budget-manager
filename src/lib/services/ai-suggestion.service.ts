@@ -98,6 +98,8 @@ export async function generateCategorySuggestion(
       model: import.meta.env.OPENROUTER_DEFAULT_MODEL || "default",
     });
 
+    const model = import.meta.env.OPENROUTER_DEFAULT_MODEL || "openai/gpt-4o-mini";
+
     const aiResponse = await openRouterService.chat({
       messages: [
         { role: "system", content: systemPrompt },
@@ -105,6 +107,7 @@ export async function generateCategorySuggestion(
       ],
       response_format: responseFormat,
       temperature: 0.3, // Lower temperature for more consistent categorization
+      model,
     });
 
     // Step 6: Parse and validate AI response

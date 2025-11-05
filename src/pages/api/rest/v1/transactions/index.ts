@@ -140,24 +140,32 @@ export const POST: APIRoute = async (context) => {
       }
 
       // Otherwise, trigger AI suggestion generation asynchronously (fire-and-forget)
-      // This runs in the background and does not block the response
-      generateCategorySuggestion(
-        supabase,
-        {
-          id: newTransaction.id,
-          description: newTransaction.description,
-          amount_cents: newTransaction.amount_cents,
-          transaction_type: newTransaction.transaction_type,
-        },
-        user.id
-      ).catch((error) => {
-        // Log errors but don't propagate them
-        console.error("Background AI suggestion generation failed:", {
-          transactionId: newTransaction.id,
-          userId: user.id,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      });
+      // In Cloudflare Workers production, ensure the task survives the response using waitUntil
+      const bgTask = (async () => {
+        try {
+          await generateCategorySuggestion(
+            supabase,
+            {
+              id: newTransaction.id,
+              description: newTransaction.description,
+              amount_cents: newTransaction.amount_cents,
+              transaction_type: newTransaction.transaction_type,
+            },
+            user.id
+          );
+        } catch (error) {
+          console.error("Background AI suggestion generation failed:", {
+            transactionId: newTransaction.id,
+            userId: user.id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      })();
+
+      // Prefer Cloudflare waitUntil when available
+      if (context.locals?.runtime?.waitUntil) {
+        context.locals.runtime.waitUntil(bgTask);
+      }
 
       // Return transaction response immediately (don't await AI suggestion)
       return new Response(JSON.stringify(newTransaction), {

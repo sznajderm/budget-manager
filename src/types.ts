@@ -61,6 +61,10 @@ export type TransactionDTO = Omit<Tables<"transactions">, "user_id"> & {
   accounts: AccountNameRef;
   /** Embedded related category (can be null when category deleted) */
   categories: CategoryNameRef | null;
+  /** Embedded AI suggestion for category (if exists) */
+  ai_suggestions?: {
+    categories: CategoryNameRef;
+  } | null;
 };
 
 export type TransactionCreateCommand = Pick<
@@ -104,6 +108,21 @@ export interface RequestAISuggestionCommand {
 export interface HandleAISuggestionCommand {
   suggestion_id: string;
   approved: boolean;
+}
+
+/** Internal type for AI suggestion generation */
+export interface TransactionForSuggestion {
+  id: string;
+  description: string;
+  amount_cents: number;
+  transaction_type: TransactionType;
+}
+
+/** Parsed AI response structure */
+export interface AICategorySuggestion {
+  suggested_category_id: string;
+  confidence_score: number;
+  reasoning: string;
 }
 
 /** Dashboard summaries */

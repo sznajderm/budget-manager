@@ -12,11 +12,34 @@ import {
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
   useDeleteTransactionMutation,
+  usePollTransactionAISuggestion,
 } from "@/hooks/useTransactions";
 import { mapTransactionsToVMs } from "@/lib/utils/transaction-mappers";
 import { centsToDollars } from "@/lib/utils/currency";
 import { formatISOToUI, getCurrentUIDate } from "@/lib/utils/datetime";
 import type { TransactionVM, TransactionFormValues } from "@/lib/transactions/types";
+
+/**
+ * Helper component to poll for AI suggestion on a single transaction
+ */
+function AISuggestionPoller({
+  transactionId,
+  onSuccess,
+  onTimeout,
+}: {
+  transactionId: string;
+  onSuccess: () => void;
+  onTimeout: () => void;
+}) {
+  usePollTransactionAISuggestion({
+    transactionId,
+    enabled: true,
+    onSuccess,
+    onTimeout,
+  });
+
+  return null; // This component doesn't render anything
+}
 
 export function TransactionsIsland() {
   // URL state management
@@ -31,6 +54,9 @@ export function TransactionsIsland() {
   // Delete dialog state
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingTx, setDeletingTx] = useState<TransactionVM | null>(null);
+
+  // Track transactions waiting for AI suggestions
+  const [pendingSuggestionIds, setPendingSuggestionIds] = useState<Set<string>>(new Set());
 
   // Initialize from URL params
   useEffect(() => {
@@ -112,9 +138,12 @@ export function TransactionsIsland() {
 
   const handleCreate = async (payload: Record<string, unknown>) => {
     try {
-      await createMutation.mutateAsync(payload);
+      const newTransaction = await createMutation.mutateAsync(payload);
       toast.success("Transaction created successfully");
       handleCloseModal();
+
+      // Add to pending suggestions set to start polling
+      setPendingSuggestionIds((prev) => new Set(prev).add(newTransaction.id));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to create transaction");
       throw error;
@@ -191,6 +220,15 @@ export function TransactionsIsland() {
     ? categories.find((cat) => cat.name.toLowerCase() === "uncategorized")?.id
     : undefined;
 
+  // Helper function to remove from pending
+  const removePendingId = (id: string) => {
+    setPendingSuggestionIds((prev) => {
+      const updated = new Set(prev);
+      updated.delete(id);
+      return updated;
+    });
+  };
+
   // Show loading or error states
   if (transactionsError) {
     return (
@@ -204,6 +242,15 @@ export function TransactionsIsland() {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
+      {/* Polling hooks for pending AI suggestions */}
+      {Array.from(pendingSuggestionIds).map((txId) => (
+        <AISuggestionPoller
+          key={txId}
+          transactionId={txId}
+          onSuccess={() => removePendingId(txId)}
+          onTimeout={() => removePendingId(txId)}
+        />
+      ))}
       <TransactionsHeader onAdd={handleOpenAddModal} />
 
       {/* Top pagination */}
@@ -221,6 +268,7 @@ export function TransactionsIsland() {
       <TransactionsTable
         items={transactions}
         loading={isLoading}
+        pendingSuggestionIds={pendingSuggestionIds}
         onEdit={handleOpenEditModal}
         onDelete={handleOpenDeleteDialog}
         onAdd={handleOpenAddModal}

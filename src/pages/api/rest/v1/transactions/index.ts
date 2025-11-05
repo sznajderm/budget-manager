@@ -5,6 +5,7 @@ import {
   TransactionCreateSchema,
   listTransactions,
   TransactionListQuerySchema,
+  getTransactionById,
   updateTransaction,
   TransactionUpdateSchema,
   TransactionIdSchema,
@@ -218,8 +219,57 @@ export const GET: APIRoute = async (context) => {
 
     const userId = user.id;
 
-    // Parse and validate query parameters
+    // Parse URL and check if this is a single transaction fetch
     const url = new URL(context.request.url);
+    const transactionId = parseTransactionIdFromQuery(url.searchParams);
+
+    // If transaction ID is provided, fetch single transaction
+    if (transactionId) {
+      try {
+        TransactionIdSchema.parse(transactionId);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return new Response(
+            JSON.stringify({
+              error: "Invalid transaction ID format: must be a valid UUID",
+            }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+      }
+
+      try {
+        const transaction = await getTransactionById(supabase, userId, transactionId);
+
+        if (!transaction) {
+          return new Response(JSON.stringify({ error: "Transaction not found" }), {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        return new Response(JSON.stringify(transaction), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (error) {
+        console.error("Transaction retrieval failed:", {
+          userId,
+          transactionId,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+
+        return new Response(JSON.stringify({ error: "Failed to retrieve transaction" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Otherwise, fetch paginated list
     const rawParams = {
       limit: url.searchParams.get("limit") || undefined,
       offset: url.searchParams.get("offset") || undefined,

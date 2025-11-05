@@ -116,7 +116,11 @@ export const POST: APIRoute = async (context) => {
 
       // If debug mode is enabled, run suggestion synchronously and return diagnostics
 
-      const runtime = context.locals?.runtime;
+      const runtime = (
+        context.locals as unknown as {
+          runtime?: { waitUntil?: (p: Promise<unknown>) => void; env?: Record<string, string> };
+        }
+      )?.runtime;
 
       if (runtime?.env?.AI_SUGGESTION_SYNC_MODE === "true") {
         const { generateCategorySuggestionDebug } = await import("../../../../../lib/services/ai-suggestion.service");
@@ -158,7 +162,7 @@ export const POST: APIRoute = async (context) => {
           }
         })();
 
-        runtime.ctx.waitUntil(bgTask); // Use the actual execution context
+        runtime?.waitUntil?.(bgTask); // Use the actual execution context safely
       }
 
       // Return transaction response immediately (don't await AI suggestion)

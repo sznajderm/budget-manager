@@ -13,13 +13,5 @@
   },
   "observability": {
     "enabled": true
-  },
-  "queues": {
-    "producers": [
-      { "queue": "ai-suggestions", "binding": "AI_SUGGESTIONS" }
-    ],
-    "consumers": [
-      { "queue": "ai-suggestions" }
-    ]
   }
 }

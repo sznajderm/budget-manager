@@ -3,6 +3,7 @@ import type { SupabaseClient } from "../../db/supabase.client";
 import type { TransactionForSuggestion, AICategorySuggestion, CategoryDTO, ResponseFormat } from "../../types";
 import { initOpenRouterService } from "./openrouter.init";
 import { listCategories } from "./category.service";
+import { OpenRouterError } from "./openrouter.errors";
 
 /**
  * Zod schema for validating AI response structure.
@@ -183,6 +184,194 @@ export async function generateCategorySuggestion(
       errorDetails: error,
       stage: "unknown",
     });
+  }
+}
+
+/**
+ * Detailed debug path for AI suggestion generation.
+ * Runs the same logic but returns diagnostics (timings, env, request sizes, result) and optionally inserts to DB.
+ */
+export async function generateCategorySuggestionDebug(
+  supabase: SupabaseClient,
+  transaction: TransactionForSuggestion,
+  userId: string,
+  options?: { performInsert?: boolean }
+): Promise<{
+  env: {
+    hasApiKey: boolean;
+    apiKeyLength?: number;
+    defaultModel?: string;
+    baseUrl?: string;
+    timeout?: number | string;
+    maxRetries?: number | string;
+  };
+  categories: { count: number };
+  request: { model: string; messageCount: number; totalContentLength: number };
+  timings: { totalMs: number; categoriesFetchMs: number; chatCallMs?: number };
+  chat:
+    | { ok: true; model: string; usage: unknown; contentSnippet: string }
+    | { ok: false; errorName: string; message: string; code?: string; statusCode?: number; retryable?: boolean };
+  dbInsert?: { attempted: boolean; ok?: boolean; error?: string };
+}> {
+  const t0 = Date.now();
+  const env = {
+    hasApiKey: !!import.meta.env.OPENROUTER_API_KEY,
+    apiKeyLength: import.meta.env.OPENROUTER_API_KEY?.length,
+    defaultModel: import.meta.env.OPENROUTER_DEFAULT_MODEL,
+    baseUrl: import.meta.env.OPENROUTER_BASE_URL,
+    timeout: import.meta.env.OPENROUTER_TIMEOUT,
+    maxRetries: import.meta.env.OPENROUTER_MAX_RETRIES,
+  };
+
+  // Fetch categories
+  const catStart = Date.now();
+  const categoriesResponse = await listCategories(supabase, userId, { limit: 50, offset: 0 });
+  const catEnd = Date.now();
+  const categories = categoriesResponse.data || [];
+
+  // Build prompts and response format (same as regular path)
+  const systemPrompt = buildSystemPrompt(categories);
+  const userPrompt = buildUserPrompt(transaction);
+  const responseFormat: ResponseFormat = {
+    type: "json_schema",
+    json_schema: {
+      name: "category_suggestion",
+      strict: true,
+      schema: {
+        type: "object",
+        properties: {
+          suggested_category_id: { type: "string" },
+          confidence_score: { type: "number" },
+          reasoning: { type: "string" },
+        },
+        required: ["suggested_category_id", "confidence_score", "reasoning"],
+        additionalProperties: false,
+      },
+    },
+  };
+
+  const model = import.meta.env.OPENROUTER_DEFAULT_MODEL || "openai/gpt-4o-mini";
+  const totalContentLength = (systemPrompt?.length || 0) + (userPrompt?.length || 0);
+
+  // Call OpenRouter
+  const openRouterService = initOpenRouterService();
+  interface ChatDiagSuccess {
+    ok: true;
+    model: string;
+    usage: unknown;
+    contentSnippet: string;
+  }
+  let chatDiag: ChatDiagSuccess | undefined;
+  let chatCallMs: number | undefined;
+  try {
+    const chatStart = Date.now();
+    const aiResponse = await openRouterService.chat({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: responseFormat,
+      temperature: 0.3,
+      model,
+    });
+    chatCallMs = Date.now() - chatStart;
+
+    const content = aiResponse.choices?.[0]?.message?.content || "";
+    chatDiag = {
+      ok: true as const,
+      model: aiResponse.model,
+      usage: aiResponse.usage,
+      contentSnippet: content.slice(0, 200),
+    };
+
+    // Optionally insert into DB like regular path
+    const performInsert = options?.performInsert !== false;
+    if (performInsert) {
+      try {
+        const parsed = CategorySuggestionSchema.parse(JSON.parse(content));
+        const suggestedCategory = categories.find((c) => c.id === parsed.suggested_category_id);
+        if (!suggestedCategory) {
+          return {
+            env,
+            categories: { count: categories.length },
+            request: { model, messageCount: 2, totalContentLength },
+            timings: { totalMs: Date.now() - t0, categoriesFetchMs: catEnd - catStart, chatCallMs },
+            chat: {
+              ok: false,
+              errorName: "ValidationError",
+              message: "AI suggested category not found among user's categories",
+            },
+            dbInsert: { attempted: false },
+          };
+        }
+
+        const { error: insertError } = await supabase.from("ai_suggestions").insert({
+          transaction_id: transaction.id,
+          suggested_category_id: parsed.suggested_category_id,
+          confidence_score: parsed.confidence_score,
+          approved: null,
+        });
+
+        if (insertError) {
+          return {
+            env,
+            categories: { count: categories.length },
+            request: { model, messageCount: 2, totalContentLength },
+            timings: { totalMs: Date.now() - t0, categoriesFetchMs: catEnd - catStart, chatCallMs },
+            chat: chatDiag,
+            dbInsert: { attempted: true, ok: false, error: insertError.message },
+          };
+        }
+
+        return {
+          env,
+          categories: { count: categories.length },
+          request: { model, messageCount: 2, totalContentLength },
+          timings: { totalMs: Date.now() - t0, categoriesFetchMs: catEnd - catStart, chatCallMs },
+          chat: chatDiag,
+          dbInsert: { attempted: true, ok: true },
+        };
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return {
+          env,
+          categories: { count: categories.length },
+          request: { model, messageCount: 2, totalContentLength },
+          timings: { totalMs: Date.now() - t0, categoriesFetchMs: catEnd - catStart, chatCallMs },
+          chat: chatDiag,
+          dbInsert: { attempted: true, ok: false, error: msg },
+        };
+      }
+    }
+
+    // If not inserting
+    return {
+      env,
+      categories: { count: categories.length },
+      request: { model, messageCount: 2, totalContentLength },
+      timings: { totalMs: Date.now() - t0, categoriesFetchMs: catEnd - catStart, chatCallMs },
+      chat: chatDiag,
+    };
+  } catch (error) {
+    chatCallMs = chatCallMs ?? 0;
+    const isORE = error instanceof OpenRouterError;
+    const isErr = error instanceof Error;
+    const diag = {
+      ok: false as const,
+      errorName: isErr ? error.name : isORE ? "OpenRouterError" : typeof error,
+      message: isErr ? error.message : String(error),
+      code: isORE ? (error as OpenRouterError).code : undefined,
+      statusCode: isORE ? (error as OpenRouterError).statusCode : undefined,
+      retryable: isORE ? (error as OpenRouterError).retryable : undefined,
+    };
+
+    return {
+      env,
+      categories: { count: categories.length },
+      request: { model, messageCount: 2, totalContentLength },
+      timings: { totalMs: Date.now() - t0, categoriesFetchMs: catEnd - catStart, chatCallMs },
+      chat: diag,
+    };
   }
 }
 

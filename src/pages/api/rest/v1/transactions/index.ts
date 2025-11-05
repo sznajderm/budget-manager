@@ -115,11 +115,14 @@ export const POST: APIRoute = async (context) => {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
       // If debug mode is enabled, run suggestion synchronously and return diagnostics
-      // const url = new URL(context.request.url);
-      // const debug = url.searchParams.get("debug");
-      // const debugEnabled = debug === "1" || debug === "true";
 
-      // if (debugEnabled) {
+      const runtime = (
+        context.locals as unknown as {
+          runtime?: { waitUntil?: (p: Promise<unknown>) => void; env?: Record<string, string> };
+        }
+      )?.runtime;
+
+      if (runtime?.env?.AI_SUGGESTION_SYNC_MODE === "true") {
         const { generateCategorySuggestionDebug } = await import("../../../../../lib/services/ai-suggestion.service");
         const debugResult = await generateCategorySuggestionDebug(
           supabase,
@@ -137,34 +140,29 @@ export const POST: APIRoute = async (context) => {
           status: 201,
           headers: { "Content-Type": "application/json" },
         });
-      // }
+      } else {
+        const bgTask = (async () => {
+          try {
+            await generateCategorySuggestion(
+              supabase,
+              {
+                id: newTransaction.id,
+                description: newTransaction.description,
+                amount_cents: newTransaction.amount_cents,
+                transaction_type: newTransaction.transaction_type,
+              },
+              user.id
+            );
+          } catch (error) {
+            console.error("Background AI suggestion generation failed:", {
+              transactionId: newTransaction.id,
+              userId: user.id,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        })();
 
-      // Otherwise, trigger AI suggestion generation asynchronously (fire-and-forget)
-      // In Cloudflare Workers production, ensure the task survives the response using waitUntil
-      const bgTask = (async () => {
-        try {
-          await generateCategorySuggestion(
-            supabase,
-            {
-              id: newTransaction.id,
-              description: newTransaction.description,
-              amount_cents: newTransaction.amount_cents,
-              transaction_type: newTransaction.transaction_type,
-            },
-            user.id
-          );
-        } catch (error) {
-          console.error("Background AI suggestion generation failed:", {
-            transactionId: newTransaction.id,
-            userId: user.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      })();
-
-      // Prefer Cloudflare waitUntil when available
-      if (context.locals?.runtime?.waitUntil) {
-        context.locals.runtime.waitUntil(bgTask);
+        runtime?.waitUntil?.(bgTask); // Use the actual execution context safely
       }
 
       // Return transaction response immediately (don't await AI suggestion)

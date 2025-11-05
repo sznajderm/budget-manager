@@ -51,6 +51,25 @@ export async function fetchTransactions(limit: number, offset: number): Promise<
 }
 
 /**
+ * Fetch a single transaction by ID
+ */
+export async function fetchSingleTransaction(id: string): Promise<TransactionDTO | null> {
+  const url = `${BASE_URL}/transactions?id=eq.${id}`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  // Handle 404 as null (transaction not found)
+  if (res.status === 404) {
+    return null;
+  }
+
+  return handleResponse<TransactionDTO>(res);
+}
+
+/**
  * Create a new transaction
  */
 export async function createTransaction(payload: TransactionCreatePayload): Promise<TransactionDTO> {

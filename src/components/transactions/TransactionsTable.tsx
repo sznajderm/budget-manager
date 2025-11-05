@@ -7,6 +7,7 @@ import type { TransactionVM } from "@/lib/transactions/types";
 interface TransactionsTableProps {
   items: TransactionVM[];
   loading: boolean;
+  pendingSuggestionIds: Set<string>;
   onEdit: (tx: TransactionVM) => void;
   onDelete: (tx: TransactionVM) => void;
   onAdd: () => void;
@@ -46,7 +47,14 @@ function SkeletonRow() {
   );
 }
 
-export function TransactionsTable({ items, loading, onEdit, onDelete, onAdd }: TransactionsTableProps) {
+export function TransactionsTable({
+  items,
+  loading,
+  pendingSuggestionIds,
+  onEdit,
+  onDelete,
+  onAdd,
+}: TransactionsTableProps) {
   // Show empty state if not loading and no items
   if (!loading && items.length === 0) {
     return <EmptyState onAdd={onAdd} />;
@@ -79,7 +87,15 @@ export function TransactionsTable({ items, loading, onEdit, onDelete, onAdd }: T
             </>
           ) : (
             // Show actual transaction rows
-            items.map((item) => <TransactionRow key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} />)
+            items.map((item) => (
+              <TransactionRow
+                key={item.id}
+                item={item}
+                isAISuggestionPending={pendingSuggestionIds.has(item.id)}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))
           )}
         </TableBody>
       </Table>

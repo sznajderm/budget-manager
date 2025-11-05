@@ -430,6 +430,102 @@ export async function updateTransaction(
 }
 
 /**
+ * Retrieves a single transaction by ID for the authenticated user
+ * @param supabase - Supabase client with user session
+ * @param userId - User ID from authenticated session
+ * @param transactionId - Transaction ID to retrieve
+ * @returns Promise<TransactionDTO | null> - The transaction with embedded names, or null if not found
+ */
+export async function getTransactionById(
+  supabase: SupabaseClient,
+  userId: string,
+  transactionId: string
+): Promise<TransactionDTO | null> {
+  try {
+    // Validate transaction ID format
+    const validatedId = TransactionIdSchema.parse(transactionId);
+
+    // Query transaction with joins for account and category names, including AI suggestion
+    const { data, error } = await supabase
+      .from("transactions")
+      .select(
+        `
+        id,
+        amount_cents,
+        transaction_type,
+        description,
+        transaction_date,
+        account_id,
+        category_id,
+        created_at,
+        updated_at,
+        accounts!inner(name),
+        categories(name),
+        ai_suggestions!left(
+          suggested_category_id,
+          categories!ai_suggestions_suggested_category_id_fkey(name)
+        )
+      `
+      )
+      .eq("id", validatedId)
+      .eq("user_id", userId)
+      .single();
+
+    if (error) {
+      // If transaction not found, return null instead of throwing
+      if (error.code === "PGRST116") {
+        return null;
+      }
+      console.error("Database error retrieving transaction:", error);
+      throw new Error("Failed to retrieve transaction from database");
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    // Transform data to match TransactionDTO format
+    const transaction: TransactionDTO = {
+      id: data.id,
+      amount_cents: data.amount_cents,
+      transaction_type: data.transaction_type as TransactionType,
+      description: data.description,
+      transaction_date: data.transaction_date,
+      account_id: data.account_id,
+      category_id: data.category_id,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      accounts: {
+        name: data.accounts?.name || "Unknown Account",
+      },
+      categories: data.categories
+        ? {
+            name: data.categories.name,
+          }
+        : null,
+      ai_suggestions: data.ai_suggestions?.categories?.name
+        ? { categories: { name: data.ai_suggestions.categories.name } }
+        : null,
+    };
+
+    return transaction;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(`Validation error: ${error.errors.map((e) => e.message).join(", ")}`);
+    }
+
+    // Re-throw our custom errors (those we explicitly throw)
+    if (error instanceof Error && (error.message.includes("Failed") || error.message.includes("An unexpected"))) {
+      throw error;
+    }
+
+    // Fallback for unexpected errors
+    console.error("Unexpected error in getTransactionById:", error);
+    throw new Error("An unexpected error occurred while retrieving the transaction");
+  }
+}
+
+/**
  * Permanently deletes a transaction for the authenticated user
  * @param supabase - Supabase client with user session
  * @param userId - User ID from authenticated session

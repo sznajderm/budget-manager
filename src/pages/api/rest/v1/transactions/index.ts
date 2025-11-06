@@ -1,4 +1,12 @@
 import type { APIRoute } from "astro";
+
+interface Platform {
+  context?: {
+    waitUntil?: (p: Promise<unknown>) => void;
+  };
+  waitUntil?: (p: Promise<unknown>) => void;
+  env?: Record<string, string>;
+}
 import { z } from "zod";
 import {
   createTransaction,
@@ -115,13 +123,13 @@ export const POST: APIRoute = async (context) => {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
       // Attempt to access Cloudflare waitUntil from multiple adapter-specific hooks
-      const platformAny = (context as unknown as Record<string, any>)?.platform;
+      const platformAny = (context as unknown as { platform?: Platform })?.platform;
       const cfWaitUntil: ((p: Promise<unknown>) => void) | undefined =
         platformAny?.context?.waitUntil || platformAny?.waitUntil;
 
       // If not already set by middleware, wire waitUntil into locals.runtime for downstream use
       if (cfWaitUntil) {
-        (context.locals as unknown as { runtime?: { waitUntil?: (p: Promise<unknown>) => void } }).runtime = {
+        (context.locals as unknown as { runtime?: Pick<Platform, "waitUntil"> }).runtime = {
           ...(context.locals as unknown as { runtime?: { waitUntil?: (p: Promise<unknown>) => void } }).runtime,
           waitUntil: cfWaitUntil,
         };
@@ -141,7 +149,7 @@ export const POST: APIRoute = async (context) => {
       // Get Cloudflare runtime context for waitUntil support
       const runtime = (
         context.locals as unknown as {
-          runtime?: { waitUntil?: (p: Promise<unknown>) => void; env?: Record<string, string> };
+          runtime?: Platform;
         }
       )?.runtime;
 

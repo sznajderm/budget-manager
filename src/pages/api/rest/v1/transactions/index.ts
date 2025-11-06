@@ -114,15 +114,26 @@ export const POST: APIRoute = async (context) => {
     try {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
-      // If debug mode is enabled, run suggestion synchronously and return diagnostics
+      // Check AI suggestion mode from environment
+      // Use import.meta.env as it's more reliable on Cloudflare than runtime.env
+      const syncModeEnv = String(import.meta.env.AI_SUGGESTION_SYNC_MODE || "").toLowerCase();
+      const isDebugMode = syncModeEnv === "true" || syncModeEnv === "1" || syncModeEnv === "debug";
 
+      console.log("AI suggestion mode:", {
+        mode: isDebugMode ? "sync/debug" : "async",
+        envValue: import.meta.env.AI_SUGGESTION_SYNC_MODE,
+        transactionId: newTransaction.id,
+      });
+
+      // Get Cloudflare runtime context for waitUntil support
       const runtime = (
         context.locals as unknown as {
           runtime?: { waitUntil?: (p: Promise<unknown>) => void; env?: Record<string, string> };
         }
       )?.runtime;
 
-      if (runtime?.env?.AI_SUGGESTION_SYNC_MODE === "true") {
+      if (isDebugMode) {
+        // Sync mode: await completion and return diagnostics
         const { generateCategorySuggestionDebug } = await import("../../../../../lib/services/ai-suggestion.service");
         const debugResult = await generateCategorySuggestionDebug(
           supabase,
@@ -136,36 +147,56 @@ export const POST: APIRoute = async (context) => {
           { performInsert: true }
         );
 
+        console.log("AI suggestion completed (sync):", {
+          transactionId: newTransaction.id,
+          success: debugResult.chat.ok,
+        });
+
         return new Response(JSON.stringify({ transaction: newTransaction, debug: debugResult }), {
           status: 201,
           headers: { "Content-Type": "application/json" },
         });
       } else {
-        const bgTask = (async () => {
-          try {
-            await generateCategorySuggestion(
-              supabase,
-              {
-                id: newTransaction.id,
-                description: newTransaction.description,
-                amount_cents: newTransaction.amount_cents,
-                transaction_type: newTransaction.transaction_type,
-              },
-              user.id
-            );
-          } catch (error) {
-            console.error("Background AI suggestion generation failed:", {
+        // Async mode: run in background with proper waitUntil registration
+        const bgTask = generateCategorySuggestion(
+          supabase,
+          {
+            id: newTransaction.id,
+            description: newTransaction.description,
+            amount_cents: newTransaction.amount_cents,
+            transaction_type: newTransaction.transaction_type,
+          },
+          user.id
+        )
+          .then(() => {
+            console.log("AI suggestion completed (async):", {
+              transactionId: newTransaction.id,
+            });
+          })
+          .catch((error) => {
+            console.error("Background AI suggestion failed:", {
               transactionId: newTransaction.id,
               userId: user.id,
               error: error instanceof Error ? error.message : String(error),
             });
-          }
-        })();
+          });
 
-        runtime?.waitUntil?.(bgTask); // Use the actual execution context safely
+        // Register background task with Cloudflare Workers runtime
+        if (runtime?.waitUntil) {
+          console.log("Registering AI suggestion with waitUntil:", {
+            transactionId: newTransaction.id,
+          });
+          runtime.waitUntil(bgTask);
+        } else {
+          // Fallback: if waitUntil unavailable, run synchronously to ensure completion
+          console.warn("waitUntil unavailable, running AI suggestion synchronously", {
+            transactionId: newTransaction.id,
+          });
+          await bgTask;
+        }
       }
 
-      // Return transaction response immediately (don't await AI suggestion)
+      // Return transaction response immediately (async suggestion runs in background)
       return new Response(JSON.stringify(newTransaction), {
         status: 201,
         headers: { "Content-Type": "application/json" },

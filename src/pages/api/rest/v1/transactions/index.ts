@@ -1,12 +1,5 @@
 import type { APIRoute } from "astro";
 
-interface Platform {
-  context?: {
-    waitUntil?: (p: Promise<unknown>) => void;
-  };
-  waitUntil?: (p: Promise<unknown>) => void;
-  env?: Record<string, string>;
-}
 import { z } from "zod";
 import {
   createTransaction,
@@ -123,13 +116,19 @@ export const POST: APIRoute = async (context) => {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
       // Attempt to access Cloudflare waitUntil from multiple adapter-specific hooks
-      const platformAny = (context as unknown as { platform?: Platform })?.platform;
+      const platformAny = (context as unknown as Record<string, unknown>)?.platform as
+        | {
+            context?: { waitUntil?: (p: Promise<unknown>) => void };
+            waitUntil?: (p: Promise<unknown>) => void;
+            env?: Record<string, string>;
+          }
+        | undefined;
       const cfWaitUntil: ((p: Promise<unknown>) => void) | undefined =
         platformAny?.context?.waitUntil || platformAny?.waitUntil;
 
       // If not already set by middleware, wire waitUntil into locals.runtime for downstream use
-      if (cfWaitUntil) {
-        (context.locals as unknown as { runtime?: Pick<Platform, "waitUntil"> }).runtime = {
+      if (cfWaitUntil && !(context.locals as Record<string, unknown>)?.runtime?.waitUntil) {
+        (context.locals as unknown as { runtime?: { waitUntil?: (p: Promise<unknown>) => void } }).runtime = {
           ...(context.locals as unknown as { runtime?: { waitUntil?: (p: Promise<unknown>) => void } }).runtime,
           waitUntil: cfWaitUntil,
         };
@@ -144,12 +143,18 @@ export const POST: APIRoute = async (context) => {
         mode: isDebugMode ? "sync/debug" : "async",
         envValue: envFlagRaw,
         transactionId: newTransaction.id,
+        hasPlatform: !!platformAny,
+        platformKeys: platformAny ? Object.keys(platformAny) : [],
+        hasPlatformContext: !!platformAny?.context,
+        hasPlatformWaitUntil: !!platformAny?.waitUntil,
+        hasPlatformContextWaitUntil: !!platformAny?.context?.waitUntil,
+        hasRuntimeWaitUntil: !!(context.locals as Record<string, unknown>)?.runtime?.waitUntil,
       });
 
       // Get Cloudflare runtime context for waitUntil support
       const runtime = (
         context.locals as unknown as {
-          runtime?: Platform;
+          runtime?: { waitUntil?: (p: Promise<unknown>) => void };
         }
       )?.runtime;
 

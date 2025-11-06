@@ -1,4 +1,12 @@
 import type { APIRoute } from "astro";
+
+interface Platform {
+  context?: {
+    waitUntil?: (p: Promise<unknown>) => void;
+  };
+  waitUntil?: (p: Promise<unknown>) => void;
+  env?: Record<string, string>;
+}
 import { z } from "zod";
 import {
   createTransaction,
@@ -114,21 +122,34 @@ export const POST: APIRoute = async (context) => {
     try {
       const newTransaction = await createTransaction(supabase, user.id, validatedData);
 
-      // Check AI suggestion mode from environment
-      // Use import.meta.env as it's more reliable on Cloudflare than runtime.env
-      const syncModeEnv = String(import.meta.env.AI_SUGGESTION_SYNC_MODE || "").toLowerCase();
+      // Attempt to access Cloudflare waitUntil from multiple adapter-specific hooks
+      const platformAny = (context as unknown as { platform?: Platform })?.platform;
+      const cfWaitUntil: ((p: Promise<unknown>) => void) | undefined =
+        platformAny?.context?.waitUntil || platformAny?.waitUntil;
+
+      // If not already set by middleware, wire waitUntil into locals.runtime for downstream use
+      if (cfWaitUntil) {
+        (context.locals as unknown as { runtime?: Pick<Platform, "waitUntil"> }).runtime = {
+          ...(context.locals as unknown as { runtime?: { waitUntil?: (p: Promise<unknown>) => void } }).runtime,
+          waitUntil: cfWaitUntil,
+        };
+      }
+
+      // Determine AI suggestion mode from Cloudflare env binding first, then import.meta.env
+      const envFlagRaw = platformAny?.env?.AI_SUGGESTION_SYNC_MODE ?? import.meta.env.AI_SUGGESTION_SYNC_MODE;
+      const syncModeEnv = String(envFlagRaw ?? "").toLowerCase();
       const isDebugMode = syncModeEnv === "true" || syncModeEnv === "1" || syncModeEnv === "debug";
 
       console.log("AI suggestion mode:", {
         mode: isDebugMode ? "sync/debug" : "async",
-        envValue: import.meta.env.AI_SUGGESTION_SYNC_MODE,
+        envValue: envFlagRaw,
         transactionId: newTransaction.id,
       });
 
       // Get Cloudflare runtime context for waitUntil support
       const runtime = (
         context.locals as unknown as {
-          runtime?: { waitUntil?: (p: Promise<unknown>) => void; env?: Record<string, string> };
+          runtime?: Platform;
         }
       )?.runtime;
 

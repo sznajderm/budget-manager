@@ -148,15 +148,17 @@ export const POST: APIRoute = async (context) => {
         hasPlatformContext: !!platformAny?.context,
         hasPlatformWaitUntil: !!platformAny?.waitUntil,
         hasPlatformContextWaitUntil: !!platformAny?.context?.waitUntil,
-        hasRuntimeWaitUntil: !!(context.locals as Record<string, unknown>)?.runtime?.waitUntil,
+        hasRuntimeCtxWaitUntil: !!(
+          context.locals as unknown as { runtime?: { ctx?: { waitUntil?: (p: Promise<unknown>) => void } } }
+        )?.runtime?.ctx?.waitUntil,
       });
 
-      // Get Cloudflare runtime context for waitUntil support
-      const runtime = (
+      // Get Cloudflare runtime context for waitUntil support (via @astrojs/cloudflare)
+      const runtimeCtx = (
         context.locals as unknown as {
-          runtime?: { waitUntil?: (p: Promise<unknown>) => void };
+          runtime?: { ctx?: { waitUntil?: (p: Promise<unknown>) => void } };
         }
-      )?.runtime;
+      )?.runtime?.ctx;
 
       if (isDebugMode) {
         // Sync mode: await completion and return diagnostics
@@ -208,11 +210,11 @@ export const POST: APIRoute = async (context) => {
           });
 
         // Register background task with Cloudflare Workers runtime
-        if (runtime?.waitUntil) {
+        if (runtimeCtx?.waitUntil) {
           console.log("Registering AI suggestion with waitUntil:", {
             transactionId: newTransaction.id,
           });
-          runtime.waitUntil(bgTask);
+          runtimeCtx.waitUntil(bgTask);
         } else {
           // Fallback: if waitUntil unavailable, run synchronously to ensure completion
           console.warn("waitUntil unavailable, running AI suggestion synchronously", {

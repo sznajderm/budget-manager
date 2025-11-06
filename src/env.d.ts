@@ -10,7 +10,11 @@ declare global {
       supabase: SupabaseClientPkg<Database>;
       user?: User;
       runtime?: {
-        waitUntil: (p: Promise<unknown>) => void;
+        ctx?: {
+          waitUntil: (p: Promise<unknown>) => void;
+        };
+        env?: Record<string, unknown>;
+        cf?: unknown;
       };
     }
   }

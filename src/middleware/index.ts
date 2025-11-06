@@ -13,7 +13,24 @@ const PUBLIC_PATHS = [
   "/api/auth/recover",
 ];
 
-export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
+export const onRequest = defineMiddleware(async (ctx, next) => {
+  const { locals, cookies, url, request, redirect } = ctx;
+
+  // Attempt to capture Cloudflare waitUntil from platform and expose via locals.runtime
+  try {
+    const platformAny = (ctx as unknown as Record<string, unknown>)?.platform;
+    const cfWaitUntil: ((p: Promise<unknown>) => void) | undefined =
+      platformAny?.context?.waitUntil || platformAny?.waitUntil;
+    if (cfWaitUntil) {
+      locals.runtime = {
+        ...(locals.runtime as Record<string, unknown>),
+        waitUntil: cfWaitUntil,
+      } as typeof locals.runtime;
+    }
+  } catch {
+    // ignore
+  }
+
   // Create per-request Supabase instance
   const supabase = createSupabaseServerInstance({
     cookies,

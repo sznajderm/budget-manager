@@ -18,26 +18,45 @@ A web-based application that helps individual users consolidate and categorize e
 ## Tech Stack
 
 | Technology | Version | Purpose |
+
 |------------|---------|---------||
+
 | **Frontend** | | |
+
 | [Astro](https://astro.build/) | 5.13.7 | Modern web framework for building fast, content-focused websites |
+
 | [React](https://react.dev/) | 19.1.1 | UI library for building interactive components |
+
 | [TypeScript](https://www.typescriptlang.org/) | 5 | Static typing for better development experience and IDE support |
+
 | [Tailwind CSS](https://tailwindcss.com/) | 4.1.13 | Utility-first CSS framework for convenient styling |
+
 | [Shadcn/ui](https://ui.shadcn.com/) | - | Accessible component library for React UI |
+
 | **Backend** | | |
+
 | [Supabase](https://supabase.com/) | - | Complete backend solution with PostgreSQL database, BaaS SDK, and built-in user authentication |
+
 || **AI Integration** | | |
+
 || [OpenRouter.ai](https://openrouter.ai/) | - | Access to various AI models (OpenAI, Anthropic, Google) for transaction categorization with cost optimization |
+
 || **Testing** | | |
 || [Vitest](https://vitest.dev/) | - | Fast unit testing framework with TypeScript support |
+
 || [@testing-library/react](https://testing-library.com/) | - | Testing utilities for React components |
+
 || [MSW](https://mswjs.io/) | - | API mocking for integration tests |
+
 || [Playwright](https://playwright.dev/) | - | End-to-end testing across Chromium, Firefox, and WebKit |
+
 || [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) | - | Accessibility testing integration |
+
 || **CI/CD & Hosting** | | |
+
 | GitHub Actions | - | CI/CD pipeline automation |
-| DigitalOcean | - | Application hosting via Docker containers |
+
+| Cloudflare | - | Application hosting |
 
 ## Getting Started Locally
 
@@ -101,9 +120,6 @@ npm run preview
 - Email/password signup and login
 - Secure session token management
 
-**Account Management**
-- Create, edit, and delete bank accounts (name, type, optional balance)
-- View list of user's accounts
 
 **Transaction Management**
 - Create, read, update, and delete transaction records
@@ -113,16 +129,12 @@ npm run preview
 **AI-Powered Categorization**
 - Automatic category suggestions via OpenRouter.ai integration
 - Display suggested categories with confidence scores
-- User can approve, reject, or modify AI suggestions
 
-**Category Management**
+**Transaction Categories**
 - 15-20 predefined standard categories
-- Create, edit, and delete custom categories
 
 **Dashboard**
 - Display total expenses and income summary
-- List recent transactions with edit/delete actions
-- Quick access to add new transactions
 
 **Data Persistence**
 - Store transaction data, AI suggestions, confidence scores, and user selections in database
@@ -135,11 +147,6 @@ npm run preview
 - Advanced analytics and reporting
 - Performance optimization for large-scale usage
 
-### Success Metrics
-
-- **Primary Goal**: Achieve ≥50% AI categorization accuracy for expenses
-- **Measurement**: Daily comparison of AI-suggested categories vs. user's final category selections
-- **Reporting**: Dashboard showing categorization accuracy percentage over time
 
 ## Project Status
 

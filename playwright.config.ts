@@ -2,8 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 import { config as loadEnv } from "dotenv";
 
 // Load test environment variables from .env.test for the entire Playwright process
-loadEnv({ path: ".env" });
-// loadEnv({ path: ".env.test" });
+loadEnv({ path: ".env.test" });
 
 export default defineConfig({
   testDir: "./e2e",

@@ -2,8 +2,7 @@ import { config as loadEnv } from "dotenv";
 import { cleanupTestUsers } from "./utils/test-cleanup";
 
 // Load environment variables from .env.test
-loadEnv({ path: ".env" });
-// loadEnv({ path: ".env.test" });
+loadEnv({ path: ".env.test" });
 
 /**
  * Global teardown runs once after all tests complete.

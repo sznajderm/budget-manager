@@ -70,7 +70,10 @@ export class TransactionsPage {
     await this.amountInput.waitFor({ state: "visible" });
     await expect(this.amountInput).toBeEditable();
     await this.amountInput.click();
-    await this.amountInput.clear();
+    // Triple-click to select all text (cross-platform), then delete
+    await this.amountInput.click({ clickCount: 3 });
+    await this.page.keyboard.press("Backspace");
+    await expect(this.amountInput).toHaveValue("");
     // Use pressSequentially to trigger onChange events for controlled React components
     await this.amountInput.pressSequentially(data.amount, { delay: 50 });
     // Wait for React state to update

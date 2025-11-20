@@ -66,11 +66,15 @@ export class TransactionsPage {
     category?: string;
     description?: string;
   }) {
-    // Fill amount (robust for masked/controlled input)
+    // Fill amount (robust for masked/controlled React input)
     await this.amountInput.waitFor({ state: "visible" });
     await expect(this.amountInput).toBeEditable();
     await this.amountInput.click();
-    await this.amountInput.fill(data.amount);
+    await this.amountInput.clear();
+    // Use pressSequentially to trigger onChange events for controlled React components
+    await this.amountInput.pressSequentially(data.amount, { delay: 50 });
+    // Wait for React state to update
+    await this.page.waitForTimeout(300);
     await expect(this.amountInput).toHaveValue(data.amount);
     // Select type (using Radix UI SelectItem)
     await this.typeSelect.click();
@@ -104,16 +108,8 @@ export class TransactionsPage {
     await expect(this.submitButton).toBeEnabled({ timeout: 5000 });
     await this.submitButton.scrollIntoViewIfNeeded();
     await this.submitButton.click();
-    // Prefer deterministic UI waits instead of networkidle
-    // Wait for either toast or modal close
-    await Promise.race([
-      this.toast.waitFor({ state: "visible", timeout: 5000 }).catch(() => {
-        // Ignore error
-      }),
-      this.modal.waitFor({ state: "hidden", timeout: 10000 }).catch(() => {
-        // Ignore error
-      }),
-    ]);
+    // Wait for modal to close after successful submission
+    await this.modal.waitFor({ state: "hidden", timeout: 15000 });
   }
 
   async createTransaction(data: {

@@ -56,11 +56,9 @@ test.describe("Complete User Flow", () => {
     };
 
     await transactionsPage.createTransaction(income1);
-    await transactionsPage.waitForModalClose();
     expect(await transactionsPage.hasTransaction(income1.description)).toBe(true);
 
     await transactionsPage.createTransaction(income2);
-    await transactionsPage.waitForModalClose();
     expect(await transactionsPage.hasTransaction(income2.description)).toBe(true);
 
     // Step 4: Add two expense transactions
@@ -79,11 +77,9 @@ test.describe("Complete User Flow", () => {
     };
 
     await transactionsPage.createTransaction(expense1);
-    await transactionsPage.waitForModalClose();
     expect(await transactionsPage.hasTransaction(expense1.description)).toBe(true);
 
     await transactionsPage.createTransaction(expense2);
-    await transactionsPage.waitForModalClose();
     expect(await transactionsPage.hasTransaction(expense2.description)).toBe(true);
 
     // Step 5: Verify all transactions are displayed on the /transactions view

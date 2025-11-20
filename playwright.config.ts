@@ -28,7 +28,8 @@ export default defineConfig({
 
   webServer: {
     // Build with test mode so Vite/Astro load .env.test (and .env.test.local) instead of default/local envs
-    command: "npm run build && npm run preview -- --port=3010",
+    // Use test config with Node adapter since Cloudflare adapter doesn't support preview
+    command: "npm run build -- --config=astro.config.test.mjs && npm run preview -- --config=astro.config.test.mjs --port=3010",
     url: "http://localhost:3010",
     reuseExistingServer: !process.env.CI,
     // Ensure the preview server inherits the same env (for any runtime reads)

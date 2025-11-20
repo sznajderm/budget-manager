@@ -3,8 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { config as loadEnv } from "dotenv";
 
 // Load envs from .env.test without printing any secret values
-loadEnv({ path: ".env" });
-// loadEnv({ path: ".env.test" });
+loadEnv({ path: ".env.test" });
 
 async function main() {
   const url = process.env.SUPABASE_URL;

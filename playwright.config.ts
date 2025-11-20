@@ -2,8 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 import { config as loadEnv } from "dotenv";
 
 // Load test environment variables from .env.test for the entire Playwright process
-loadEnv({ path: ".env" });
-// loadEnv({ path: ".env.test" });
+loadEnv({ path: ".env.test" });
 
 export default defineConfig({
   testDir: "./e2e",
@@ -29,7 +28,9 @@ export default defineConfig({
 
   webServer: {
     // Build with test mode so Vite/Astro load .env.test (and .env.test.local) instead of default/local envs
-    command: "npm run build && npm run preview -- --port=3010",
+    // Use test config with Node adapter since Cloudflare adapter doesn't support preview
+    command:
+      "npm run build -- --config=astro.config.test.mjs && npm run preview -- --config=astro.config.test.mjs --port=3010",
     url: "http://localhost:3010",
     reuseExistingServer: !process.env.CI,
     // Ensure the preview server inherits the same env (for any runtime reads)

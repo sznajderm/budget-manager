@@ -8,7 +8,7 @@ export default defineConfig({
     environment: "happy-dom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    exclude: ["node_modules", "e2e", "dist", ".astro"],
+    exclude: ["node_modules", "e2e", "dist", ".astro", "astro.config.*.mjs"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

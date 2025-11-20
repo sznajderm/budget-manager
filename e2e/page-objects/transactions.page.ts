@@ -6,6 +6,7 @@ export class TransactionsPage {
   readonly addButton: Locator;
   readonly transactionsTable: Locator;
   readonly modal: Locator;
+  readonly modalOverlay: Locator;
   readonly modalTitle: Locator;
   readonly amountInput: Locator;
   readonly typeSelect: Locator;
@@ -27,6 +28,7 @@ export class TransactionsPage {
 
     // Modal elements
     this.modal = page.locator('[role="dialog"]');
+    this.modalOverlay = page.locator('[data-slot="dialog-overlay"]');
     this.modalTitle = this.modal.locator("h2");
     // Scope inputs to the open modal to avoid interacting with hidden/detached nodes
     this.amountInput = this.modal.locator("#amount_dollars");
@@ -113,6 +115,10 @@ export class TransactionsPage {
     await this.submitButton.click();
     // Wait for modal to close after successful submission
     await this.modal.waitFor({ state: "hidden", timeout: 15000 });
+    // Also wait for overlay to be hidden (handles animation duration-200)
+    await this.modalOverlay.waitFor({ state: "hidden", timeout: 5000 });
+    // Extra safety: wait for animations to complete (200ms + buffer)
+    await this.page.waitForTimeout(300);
   }
 
   async createTransaction(data: {
@@ -130,6 +136,8 @@ export class TransactionsPage {
 
   async waitForModalClose() {
     await this.modal.waitFor({ state: "hidden", timeout: 10000 });
+    await this.modalOverlay.waitFor({ state: "hidden", timeout: 5000 });
+    await this.page.waitForTimeout(300);
   }
 
   async waitForSuccessToast() {
